@@ -1,7 +1,6 @@
 #ifndef FACEDETECTOR_H
 #define FACEDETECTOR_H
 
-#include "params.h"
 #include <opencv2/dnn.hpp>
 
 class FaceDetection

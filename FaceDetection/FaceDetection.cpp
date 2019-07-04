@@ -1,4 +1,5 @@
 #include "FaceDetection.h"
+#include "params.h"
 
 FaceDetection g_faceDT;
 
