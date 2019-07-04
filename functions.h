@@ -4,6 +4,9 @@
 #include <opencv2/core.hpp>
 #include <map>
 
+//判断是否空的人脸库
+bool isEmptyFaceDb();
+
 //升级resnet数据库
 void updateResnetDb();
 
@@ -21,6 +24,7 @@ bool isMarkedImg(const cv::Mat &img);
 
 //获取标准文件夹格式下的文件
 void getFiles(std::string path, std::map<std::string, std::string> &files);
+void getFiles_less(std::string path, std::map<std::string, std::string> &files);
 void getFileByName(std::string path, std::vector<cv::Mat> &imgs);
 
 //均衡化

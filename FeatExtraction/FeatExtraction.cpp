@@ -11,6 +11,7 @@ FeatExtraction::FeatExtraction()
 {
     m_method.assign(FEATEX_METHOD);
     
+    std::cout<<"SHAPE_PREDICTOR_PATH:"<<SHAPE_PREDICTOR_PATH<<std::endl;
     dlib::deserialize(SHAPE_PREDICTOR_PATH) >> m_shapePredictor;
     
     if(m_method == "resnet")
@@ -68,9 +69,9 @@ void FeatExtraction::resnetEx(const cv::Mat &faceMat, cv::Mat &feat)
     dlib::assign_image(dimg, dlib::cv_image<uchar>(faceMat2));
     
     //得到shape
-    cv::Rect rect(0,0,faceMat2.cols-1,faceMat2.rows-1);
+    cv::Rect rect(0,0,faceMat.cols-1,faceMat.rows-1);
     dlib::full_object_detection shape;
-    getShape(faceMat2,rect,shape);
+    getShape(faceMat,rect,shape);
     
     //提取特征
     dlib::matrix<dlib::rgb_pixel> face_chip;
@@ -233,17 +234,65 @@ void FeatExtraction::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::
     resultImg = rotatedImg(faceRect).clone();
 }
 
-void FeatExtraction::saveFeat(std::string name, const cv::Mat &feat)
+void addLine(cv::Mat &mat, const cv::Mat &line)
 {
-    
+    int n = mat.rows+1;
+    cv::Mat newMat(n,mat.cols,CV_32F);
+    mat.copyTo(newMat.rowRange(0,n-1));
+    line.copyTo(newMat.rowRange(n-1,n));
+    newMat.copyTo(mat);
 }
 
-void FeatExtraction::saveFeats(std::vector<std::string> names, const cv::Mat &feats)
+void FeatExtraction::saveFeat_add(std::string name, const cv::Mat &feat)
 {
+    std::vector<std::string> names;
+    cv::Mat feats;
     
+    cv::FileStorage fsread(FEATS_PATH,cv::FileStorage::READ);
+    fsread["names"]>>names;
+    fsread["feats"]>>feats;
+    fsread.release();
+    
+    names.push_back(name);
+    addLine(feats,feat);
+    
+    cv::FileStorage fswrite(FEATS_PATH,cv::FileStorage::WRITE);
+    fswrite<<"names"<<names;
+    fswrite<<"feats"<<feats;
+    fswrite.release();
 }
 
-void FeatExtraction::loadFeats(std::vector<std::string> names, cv::Mat &feats)
+void FeatExtraction::saveFeats_overwrite(std::vector<std::string> names, const cv::Mat &feats)
 {
-    
+    cv::FileStorage fswrite(FEATS_PATH,cv::FileStorage::WRITE);
+    fswrite<<"names"<<names;
+    fswrite<<"feats"<<feats;
+    fswrite.release();
+}
+
+void FeatExtraction::loadFeats(const std::vector<std::string> &candidates, 
+                               cv::Mat &feats, std::vector<std::string> &names)
+{
+    /*
+    cv::FileStorage fsread(FEATS_PATH,cv::FileStorage::READ);
+    fsread["names"]>>names;
+    fsread["feats"]>>feats;
+    fsread.release();
+    */
+}
+
+void FeatExtraction::saveFeats_resnet(std::vector<std::string> names, const cv::Mat &feats)
+{
+    cv::FileStorage fswrite(RESNET_FEATS_PATH,cv::FileStorage::WRITE);
+    fswrite<<"names"<<names;
+    fswrite<<"feats"<<feats;
+    fswrite.release();
+}
+
+void FeatExtraction::loadFeats_resnet(std::vector<std::string> &names, cv::Mat &feats)
+{
+    cv::FileStorage fsread(RESNET_FEATS_PATH,cv::FileStorage::READ);
+    fsread["names"]>>names;
+    fsread["feats"]>>feats;
+    fsread.release();
 }

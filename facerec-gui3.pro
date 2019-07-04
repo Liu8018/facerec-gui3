@@ -34,7 +34,8 @@ SOURCES += \
         functions.cpp \
         gui/mainwindow.cpp \
         main.cpp \
-        params.cpp
+    gui/SignUpDialog.cpp \
+    params.cpp
 
 HEADERS += \
         FaceDetection/FaceDetection.h \
@@ -45,10 +46,12 @@ HEADERS += \
         elm/elm_model.h \
         functions.h \
         gui/mainwindow.h \
-        params.h
+        params.h \
+    gui/SignUpDialog.h
 
 FORMS += \
-        gui/mainwindow.ui
+        gui/mainwindow.ui \
+    gui/SignUpDialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -57,3 +60,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 INCLUDEPATH += $$PWD/../include
 LIBS += -L$$PWD/../libs/ -ldlib -lpthread -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgproc -lopencv_imgcodecs -lopencv_dnn
+
+RESOURCES += \
+    gui/resources.qrc

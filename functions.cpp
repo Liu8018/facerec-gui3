@@ -18,7 +18,7 @@ void refitEIEModel()
     for(int i=0;i<nModels;i++)
         eieModel.setSubModelHiddenNodes(i,ELM_NHIDDENNODES);//超参3:elm隐藏层节点数
     
-    eieModel.fitSubModels();
+    eieModel.fitSubModels_faceFeat();
     eieModel.fitMainModel();
     
     eieModel.save();
@@ -27,8 +27,11 @@ void refitEIEModel()
 void updateResnetDb()
 {
     std::map<std::string, std::string> files;
-    getFiles(FACEDB_PATH, files);
+    std::cout<<"test1"<<std::endl;
+    getFiles_less(FACEDB_PATH, files);
+    std::cout<<"test2"<<std::endl;
     
+    std::vector<std::string> names;
     cv::Mat feats;
     int id = 0;
     for(std::map<std::string, std::string>::iterator it = files.begin();it != files.end();it++)
@@ -46,26 +49,33 @@ void updateResnetDb()
         if(feats.empty())
             feats.create(files.size(),feat.cols,CV_32F);
         
+        names.push_back(it->second);
         feat.copyTo(feats.rowRange(id,id+1));
         id++;
     }
     
-    saveMatAsXml(feats, FACEDB_PATH + "/resnetFeats.xml");
+    g_featEX.saveFeats_resnet(names,feats);
 }
 
 void handleFaceDb(int method)
 {
     std::map<std::string, std::string> files;
+    std::cout<<"mmptest3"<<std::endl;
+    std::cout<<"FACEDB_PATH:"<<FACEDB_PATH<<std::endl;
     getFiles(FACEDB_PATH,files);
+    std::cout<<"test4"<<std::endl;
     
     if(files.empty())
+    {
+        std::cout<<"face database is empty"<<std::endl;
         return;
+    }
     
     //人脸检测初始化
     FaceDetection detection;
 
     //对库中图像进行人脸检测并裁剪、对齐
-    for(std::map<std::string, std::string>::iterator it = files.begin(); it != files.end(); it++  )
+    for(std::map<std::string, std::string>::iterator it = files.begin(); it != files.end(); it++)
     {
         cv::Mat image = cv::imread(it->first);
         
@@ -101,18 +111,23 @@ void handleFaceDb(int method)
         remove(it->first.data());
         cv::imwrite(outFile,resultImg);
     }
+    std::cout<<"test5"<<std::endl;
     
     if(method == 1)
     {
+        std::cout<<"test5.5"<<std::endl;
         //重新训练elm-in-elm模型
         refitEIEModel();
     }
     
+    std::cout<<"test6"<<std::endl;
     if(method == 2)
     {
+        std::cout<<"test7"<<std::endl;
         //重新用resnet模型提取特征库
         updateResnetDb();
     }
+    std::cout<<"test8"<<std::endl;
 }
 
 void markImg(cv::Mat &img)
@@ -156,6 +171,16 @@ bool isMarkedImg(const cv::Mat &img)
     //std::cout<<key<<std::endl;
     
     if(key == "101100101100101100101100101100101100")
+        return true;
+    else
+        return false;
+}
+
+bool isEmptyFaceDb()
+{
+    std::map<std::string, std::string> files;
+    getFiles(FACEDB_PATH,files);
+    if(files.empty())
         return true;
     else
         return false;
@@ -205,6 +230,55 @@ void getFiles(std::string path, std::map<std::string, std::string> &files)
 		{
             std::string p = path + std::string(ptr->d_name);
             getFiles(p,files);
+        }
+	}
+	
+	closedir(dir);
+	return ;
+}
+
+void getFiles_less(std::string path, std::map<std::string, std::string> &files)
+{
+    DIR *dir;
+	struct dirent *ptr;
+
+	if(path[path.length()-1] != '/')
+		path = path + "/";
+
+	if((dir = opendir(path.c_str())) == nullptr)
+	{
+		std::cout<<"open the dir: "<< path <<" error!" <<std::endl;
+		return;
+	}
+	
+	while((ptr=readdir(dir)) !=nullptr )
+	{
+		///current dir OR parrent dir 
+		if(strcmp(ptr->d_name,".")==0 || strcmp(ptr->d_name,"..")==0) 
+            continue; 
+		else if(ptr->d_type == 8) //file
+        {
+            std::string fn(ptr->d_name);
+            
+            std::string tail = fn.substr(fn.length()-3,fn.length()-1);
+            if(tail == "dat" || tail == "xml")
+                continue;
+            
+            std::string className = path;
+            className.pop_back();
+            className = className.substr(className.find_last_of("/")+1,className.length()-1);
+            
+            std::string p = path + fn;
+            files.insert(std::pair<std::string, std::string>(p, className));
+            
+            break;
+        }
+        else if(ptr->d_type == 10)    ///link file
+        {}
+        else if(ptr->d_type == 4)    ///dir
+        {
+            std::string p = path + std::string(ptr->d_name);
+            getFiles_less(p,files);
         }
 	}
 	
@@ -285,14 +359,16 @@ void loadXmlAsMat(std::string path, cv::Mat &mat)
 
 void faceImgPreprocessing(const cv::Mat &img, cv::Mat &feat)
 {
+    cv::Mat img2 = img.clone();
+    
     //缩放为标准尺寸
-    cv::resize(img,img,FACE_IMGSIZE);
+    cv::resize(img2,img2,FACE_IMGSIZE);
     
     //均衡化
-    equalizeIntensity(img);
+    equalizeIntensity(img2);
     
     //特征提取
-    g_featEX.extract(img,feat);
+    g_featEX.extract(img2,feat);
 }
 
 void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats)
@@ -302,7 +378,7 @@ void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats)
     
     cv::Mat feat;
     faceImgPreprocessing(imgs[0],feat);
-    feats.create(imgs.size(),feat.cols);
+    feats.create(imgs.size(),feat.cols,CV_32F);
     feat.copyTo(feats.rowRange(0,1));
     
     for(size_t i=1;i<imgs.size();i++)
@@ -314,17 +390,19 @@ void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats)
 
 void faceImgPreprocessing(const cv::Mat &img, cv::Mat &feat, std::string name)
 {
+    cv::Mat img2 = img.clone();
+    
     //缩放为标准尺寸
-    cv::resize(img,img,FACE_IMGSIZE);
+    cv::resize(img2,img2,FACE_IMGSIZE);
     
     //均衡化
-    equalizeIntensity(img);
+    equalizeIntensity(img2);
     
     //特征提取
-    g_featEX.extract(img,feat);
+    g_featEX.extract(img2,feat);
     
     //输出
-    g_featEX.saveFeat(name,feat);
+    g_featEX.saveFeat_add(name,feat);
 }
 
 void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats, std::vector<std::string> names)
@@ -334,7 +412,7 @@ void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats, std:
     
     cv::Mat feat;
     faceImgPreprocessing(imgs[0],feat);
-    feats.create(imgs.size(),feat.cols);
+    feats.create(imgs.size(),feat.cols,CV_32F);
     feat.copyTo(feats.rowRange(0,1));
     
     for(size_t i=1;i<imgs.size();i++)
@@ -343,5 +421,5 @@ void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats, std:
         feat.copyTo(feats.rowRange(i,i+1));
     }
     
-    g_featEX.saveFeats(names,feats);
+    g_featEX.saveFeats_overwrite(names,feats);
 }

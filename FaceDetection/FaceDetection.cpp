@@ -1,13 +1,14 @@
 #include "FaceDetection.h"
 #include "params.h"
+#include <iostream>
 
 FaceDetection g_faceDT;
 
 FaceDetection::FaceDetection()
 {
-    m_net = cv::dnn::readNet(
-                "./data/face_detection/opencv_face_detector_uint8.pb",
-                "./data/face_detection/opencv_face_detector.pbtxt");
+    m_net = cv::dnn::readNetFromTensorflow(
+                FACEDT_MODEL_PATH,
+                FACEDT_MODELCONF_PATH);
 }
 
 void FaceDetection::detect(const cv::Mat &img, std::vector<cv::Rect> &boxes)
@@ -24,7 +25,7 @@ void FaceDetection::detect(const cv::Mat &img, std::vector<cv::Rect> &boxes)
     {
         float confidence = detections.at<float>(i, 2);
 
-        if (confidence > FACEDT_CONF_TH)
+        if (confidence > FACEDT_CONF_THRESHOLD)
         {
             int xLeftBottom = static_cast<int>(detections.at<float>(i, 3) * img.cols);
             int yLeftBottom = static_cast<int>(detections.at<float>(i, 4) * img.rows);
