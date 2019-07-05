@@ -6,6 +6,7 @@
 #include "FeatExtraction/FeatExtraction.h"
 #include "FaceRecognition/FaceRecognition.h"
 #include "functions.h"
+#include <opencv2/highgui.hpp>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -54,8 +55,7 @@ void MainWindow::showMat()
 
 void MainWindow::on_pushButton_SignUp_clicked()
 {
-    /*
-    if(m_faceROI_src.empty())
+    if(m_faceROI.empty())
         return;
     
     m_timer->stop();
@@ -65,16 +65,15 @@ void MainWindow::on_pushButton_SignUp_clicked()
     //登记窗口打开时停止其他窗口的运行
     signUpDlg->setWindowModality(Qt::ApplicationModal);
     //信息传递
-    connect(signUpDlg, SIGNAL(sendData(bool, std::string)), this, SLOT(addFace(bool, std::string)));
+    connect(signUpDlg, SIGNAL(sendData(std::string)), this, SLOT(addFace(std::string)));
     
-    signUpDlg->setImg(m_faceROI_src);
+    signUpDlg->setImg(m_faceROI);
     signUpDlg->show();
     signUpDlg->exec();
     
     delete signUpDlg;
     
     m_timer->start();
-    */
 }
 
 void MainWindow::updateFrame()
@@ -139,13 +138,9 @@ void MainWindow::updateFrame()
 }
 
 
-void MainWindow::addFace(bool isSignUp, std::string name)
+void MainWindow::addFace(std::string name)
 {
-    /*
-    if(!isSignUp || name.empty())
-        return;
-        
-    std::string filename = "./data/face_database/" + name;
+    std::string filename = FACEDB_PATH + "/" + name;
     
     //若不存在则新建
     bool isNewClass = 0;
@@ -159,38 +154,33 @@ void MainWindow::addFace(bool isSignUp, std::string name)
     
     //输出
     if(isNewClass)
-    {
         filename += name + ".png";
-    }
     else
     {
-        time_t t = time(0);
+        time_t t = time(nullptr);
         char strTime[64];
         strftime(strTime, 64, "%Y-%m-%d-%H-%M-%S", localtime(&t));
         
         filename += name+std::string(strTime) + ".png";
     }
     
-    markImg(m_faceROI_src);
-    cv::imwrite(filename,m_faceROI_src);
-    if(isEmptyRun)
-    {
-        filename = "./data/face_database/" + name + "/" + name + "2.png";
-        cv::imwrite(filename,m_faceROI_src);
-        isEmptyRun = false;
-    }
+    markImg(m_faceROI);
+    cv::imwrite(filename,m_faceROI);
+    if(m_isEmptyRun)
+        m_isEmptyRun = false;
     
     //更新数据库
-    if(m_rec.method == "resnet" && isNewClass)
+    if(REC_METHOD == "resnet" && isNewClass)
     {
-        m_rec.init_updateResnetDb();
+        g_featEX.addResnetFeat(m_faceROI,name);
     }
-    if(m_rec.method == "elm")
+    if(REC_METHOD == "elm")
     {
+        /*
         if(isNewClass)
             m_rec.init_updateEIEdb();
         else
             m_rec.updateEIEdb(m_faceROI,name);
+            */
     }
-    */
 }

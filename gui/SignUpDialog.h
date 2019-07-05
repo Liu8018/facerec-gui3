@@ -22,7 +22,7 @@ private:
     Ui::SignUpDialog *ui;
     
 signals:
-    void sendData(bool isSignUp, std::string name);
+    void sendData(std::string name);
 private slots:
     void on_pushButton_OK_clicked();
     void on_pushButton_Cancel_clicked();

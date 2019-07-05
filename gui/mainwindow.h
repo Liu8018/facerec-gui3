@@ -38,7 +38,7 @@ private:
 private slots:
     void updateFrame();
     void on_pushButton_SignUp_clicked();
-    void addFace(bool isSignUp, std::string name);
+    void addFace(std::string name);
 };
 
 #endif // MAINWINDOW_H

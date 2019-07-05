@@ -27,9 +27,7 @@ void refitEIEModel()
 void updateResnetDb()
 {
     std::map<std::string, std::string> files;
-    std::cout<<"test1"<<std::endl;
     getFiles_less(FACEDB_PATH, files);
-    std::cout<<"test2"<<std::endl;
     
     std::vector<std::string> names;
     cv::Mat feats;
@@ -60,10 +58,7 @@ void updateResnetDb()
 void handleFaceDb(int method)
 {
     std::map<std::string, std::string> files;
-    std::cout<<"mmptest3"<<std::endl;
-    std::cout<<"FACEDB_PATH:"<<FACEDB_PATH<<std::endl;
     getFiles(FACEDB_PATH,files);
-    std::cout<<"test4"<<std::endl;
     
     if(files.empty())
     {
@@ -111,23 +106,18 @@ void handleFaceDb(int method)
         remove(it->first.data());
         cv::imwrite(outFile,resultImg);
     }
-    std::cout<<"test5"<<std::endl;
     
     if(method == 1)
     {
-        std::cout<<"test5.5"<<std::endl;
         //重新训练elm-in-elm模型
         refitEIEModel();
     }
     
-    std::cout<<"test6"<<std::endl;
     if(method == 2)
     {
-        std::cout<<"test7"<<std::endl;
         //重新用resnet模型提取特征库
         updateResnetDb();
     }
-    std::cout<<"test8"<<std::endl;
 }
 
 void markImg(cv::Mat &img)

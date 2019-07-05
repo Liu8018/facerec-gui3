@@ -15,13 +15,12 @@ SignUpDialog::~SignUpDialog()
 
 void SignUpDialog::on_pushButton_OK_clicked()
 {
-    emit sendData(true,ui->lineEdit->text().toStdString());
+    emit sendData(ui->lineEdit->text().toStdString());
     this->close();
 }
 
 void SignUpDialog::on_pushButton_Cancel_clicked()
 {
-    emit sendData(false,ui->lineEdit->text().toStdString());
     this->close();
 }
 

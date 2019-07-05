@@ -296,3 +296,25 @@ void FeatExtraction::loadFeats_resnet(std::vector<std::string> &names, cv::Mat &
     fsread["feats"]>>feats;
     fsread.release();
 }
+
+void FeatExtraction::addResnetFeat(const cv::Mat &faceImg, const std::string &name)
+{
+    cv::Mat feat;
+    resnetEx(faceImg,feat);
+    
+    std::vector<std::string> names;
+    cv::Mat feats;
+    
+    cv::FileStorage fsread(RESNET_FEATS_PATH,cv::FileStorage::READ);
+    fsread["names"]>>names;
+    fsread["feats"]>>feats;
+    fsread.release();
+    
+    names.push_back(name);
+    addLine(feats,feat);
+    
+    cv::FileStorage fswrite(RESNET_FEATS_PATH,cv::FileStorage::WRITE);
+    fswrite<<"names"<<names;
+    fswrite<<"feats"<<feats;
+    fswrite.release();
+}

@@ -9,7 +9,7 @@ FaceRecognition::FaceRecognition()
 {
     if(REC_METHOD == "elm")
     {
-        if(access((std::string(ELM_MODEL_PATH) + "/mainModel.xml").data(),F_OK) == -1)
+        if(access((ELM_MODEL_PATH + "/mainModel.xml").data(),F_OK) == -1)
             handleFaceDb(1);
         m_eieModel.load(ELM_MODEL_PATH);
     }
@@ -24,7 +24,6 @@ std::string FaceRecognition::recognize_resnetOnly(const cv::Mat &faceImg)
     cv::Mat feats;
     g_featEX.loadFeats_resnet(names,feats);
     
-    /*
     //相似度：特征夹角余弦
     float maxSim = 0;
     std::string maxSimName;
@@ -44,13 +43,12 @@ std::string FaceRecognition::recognize_resnetOnly(const cv::Mat &faceImg)
         }
     }
     
-    std::cout<<"maxSim:"<<maxSim<<std::endl;
     if(maxSim > MINSIMILARITY_RESNET)
         return maxSimName;
     else
         return "others";
-        */
     
+    /*
     float minDis = 100;
     std::string minDisName;
     for(int i=0;i<feats.rows;i++)
@@ -67,6 +65,7 @@ std::string FaceRecognition::recognize_resnetOnly(const cv::Mat &faceImg)
     
     std::cout<<"minDistance:"<<minDis<<std::endl;
     return minDisName;
+    */
 }
 
 void FaceRecognition::getCandidatesByELM(const cv::Mat &faceImg, int n, std::vector<std::string> &candidates)
