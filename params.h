@@ -31,6 +31,7 @@ const std::string ELM_MODEL_PATH = "./data/models/ELM_Models";
 const cv::Size FACE_IMGSIZE = cv::Size(50,50);
 const int ELM_MODELS_COUNT = 10;
 const int ELM_NHIDDENNODES = 100;
+const int NCANDIDATES = 3;
 
 /*
 //人脸数据库路径

@@ -19,6 +19,9 @@ public:
     //只使用resnet的特征进行识别
     std::string recognize_resnetOnly(const cv::Mat &faceImg);
     
+    //elm训练新图片
+    void EIEtrainNewFace(const cv::Mat &faceImg, std::string name);
+    
 private:
     ELM_IN_ELM_Model m_eieModel;
 };

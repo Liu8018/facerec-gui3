@@ -361,6 +361,7 @@ void ELM_Model::save(std::string path, std::string K_path)
     fswrite<<"width"<<m_width;
     fswrite<<"height"<<m_height;
     fswrite<<"m_H"<<m_H;
+    fswrite<<"m_O"<<m_O;
     fswrite<<"W_IH"<<m_W_IH;
     fswrite<<"W_HO"<<m_W_HO;
     fswrite<<"B_H"<<m_B_H;
@@ -385,6 +386,7 @@ void ELM_Model::load(std::string path, std::string K_path)
     fsread["width"]>>m_width;
     fsread["height"]>>m_height;
     fsread["m_H"]>>m_H;
+    fsread["m_O"]>>m_O;
     fsread["W_IH"]>>m_W_IH;
     fsread["W_HO"]>>m_W_HO;
     fsread["B_H"]>>m_B_H;
@@ -454,6 +456,18 @@ void ELM_Model::trainNewImg(const cv::Mat &img, const std::string label)
     trainMats.push_back(img);
     
     inputData_2d(trainMats,trainLabels,m_width,m_height,m_channels);
+    
+    fit();
+}
+
+void ELM_Model::trainNewFace(const cv::Mat &feat, const std::vector<bool> &labelBin)
+{
+    clearTrainData();
+    
+    std::vector<std::vector<bool>> trainLabels;
+    trainLabels.push_back(labelBin);
+    
+    inputData_1d(feat,trainLabels);
     
     fit();
 }

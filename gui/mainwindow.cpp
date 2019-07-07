@@ -132,7 +132,7 @@ void MainWindow::updateFrame()
             
             if(REC_METHOD == "elm")
             {
-                int n = 5;
+                int n = NCANDIDATES;
                 std::vector<std::string> candidates;
                 g_faceRC.getCandidatesByELM(m_faceROI,n,candidates);
                 
@@ -141,8 +141,8 @@ void MainWindow::updateFrame()
                 
                 showNames(candidates,sims);
                 
-                for(int i=0;i<n;i++)
-                    std::cout<<"name:"<<candidates[i]<<"sim:"<<sims[i]<<std::endl;
+                //for(int i=0;i<n;i++)
+                //    std::cout<<"name:"<<candidates[i]<<"sim:"<<sims[i]<<std::endl;
             }
             
             //显示识别结果
@@ -196,11 +196,11 @@ void MainWindow::addFace(std::string name)
     }
     if(REC_METHOD == "elm")
     {
-        /*
         if(isNewClass)
-            m_rec.init_updateEIEdb();
+            refitEIEModel();
         else
-            m_rec.updateEIEdb(m_faceROI,name);
-            */
+        {
+            g_faceRC.EIEtrainNewFace(m_faceROI,name);
+        }
     }
 }

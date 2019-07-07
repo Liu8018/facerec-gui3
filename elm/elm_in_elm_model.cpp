@@ -253,22 +253,28 @@ void ELM_IN_ELM_Model::fitMainModel_faceFeat(int batchSize, bool validating, boo
 {
     std::cout<<"【elm-in-elm训练开始】--------------------------------------"<<std::endl;
     
-    if(m_trainImgs.empty())
+    if(m_faceFeats.empty())
         return;
+    
+    m_Q = m_faceFeats.rows;
     
     //载入子模型
     if(m_subModels.empty())
     {
         m_subModels.resize(m_n_models);
         for(int i=0;i<m_n_models;i++)
+        {
+            m_subModels[i] = ELM_Model();
+            
             m_subModels[i].load(m_modelPath+"subModel"+std::to_string(i)+".xml",
                               m_modelPath+"subK"+std::to_string(i)+".xml");
+        }
     }
     
     //为H和T分配空间
     int M = m_n_models;
     if(batchSize==-1)
-        batchSize = m_trainImgs.size();
+        batchSize = m_faceFeats.rows;
     m_C = m_label_string.size();
     cv::Mat H(cv::Size(M*m_C,batchSize),CV_32F);
     cv::Mat batchTarget(cv::Size(m_C,batchSize),CV_32F);
@@ -406,6 +412,7 @@ void ELM_IN_ELM_Model::load(std::string modelDir)
 
     fsread["n_models"]>>m_n_models;
     fsread["subModelPath"]>>m_modelPath;
+    setInitPara(m_n_models,m_modelPath);
     fsread["channels"]>>m_channels;
     fsread["width"]>>m_width;
     fsread["height"]>>m_height;
@@ -423,6 +430,8 @@ void ELM_IN_ELM_Model::load(std::string modelDir)
     m_subModels.resize(m_n_models);
     for(int m=0;m<m_n_models;m++)
     {
+        m_subModels[m] = ELM_Model();
+        
         m_subModels[m].load(m_modelPath+"subModel"+std::to_string(m)+".xml",
                             m_modelPath+"subK"+std::to_string(m)+".xml");
     }
@@ -451,7 +460,18 @@ void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, std::string &label)
     cv::Mat feat;
     faceImgPreprocessing(mat,feat);
     
-    query(feat,label);
+    cv::Mat H(cv::Size(m_n_models*m_C,1),CV_32F);
+    
+    for(int m=0;m<m_n_models;m++)
+    {
+        cv::Mat ROI = H(cv::Range(0,1),cv::Range(m*m_C,(m+1)*m_C));
+        m_subModels[m].queryFeat(mat,ROI);
+    }
+    
+    cv::Mat output = H * m_F;
+    int maxId = getMaxId(output);
+    
+    label.assign(m_label_string[maxId]);
 }
 
 void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string> &names)
@@ -477,13 +497,6 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
     
     for(size_t i=0;i<n;i++)
         names.push_back(m_label_string[maxIds[i]]);
-    
-    /*
-    //test
-    std::cout<<"names:"<<std::endl;
-    for(int i=0;i<names.size();i++)
-        std::cout<<names[i]<<std::endl;
-        */
 }
 
 void ELM_IN_ELM_Model::queryFace(const cv::Mat &faceImg, int n, std::vector<std::string> &names)
@@ -547,16 +560,51 @@ void ELM_IN_ELM_Model::trainNewImg(const cv::Mat &img, const std::string label)
     m_trainLabelBins.push_back(labelBin);
     m_Q = 1;
     
-    fitSubModels(-1,false,false);
+    for(int i=0;i<m_n_models;i++)
+    {
+        m_subModelToTrain = ELM_Model();
+        
+        m_subModelToTrain.load(m_modelPath+"subModel"+std::to_string(i)+".xml",
+                          m_modelPath+"subK"+std::to_string(i)+".xml");
+        
+        m_subModelToTrain.trainNewImg(img,label);
+        m_subModelToTrain.save(m_modelPath+"subModel"+std::to_string(i)+".xml",
+                               m_modelPath+"subK"+std::to_string(i)+".xml");
+    }
+    
     fitMainModel(-1,false,false);
 }
 
 void ELM_IN_ELM_Model::trainNewFace(const cv::Mat &img, const std::string label)
 {
     cv::Mat feat;
-    faceImgPreprocessing(img,feat);
+    faceImgPreprocessing(img,feat,label);
     
-    trainNewImg(feat,label);
+    clearTrainData();
+    m_faceFeats.push_back(feat);
+    std::vector<bool> labelBin(m_C,0);
+    for(int i=0;i<m_label_string.size();i++)
+        if(label == m_label_string[i])
+        {
+            labelBin[i] = 1;
+            break;
+        }
+    m_trainLabelBins.push_back(labelBin);
+    m_Q = 1;
+    
+    for(int i=0;i<m_n_models;i++)
+    {
+        m_subModelToTrain = ELM_Model();
+        
+        m_subModelToTrain.load(m_modelPath+"subModel"+std::to_string(i)+".xml",
+                          m_modelPath+"subK"+std::to_string(i)+".xml");
+        
+        m_subModelToTrain.trainNewFace(feat,labelBin);
+        
+        m_subModelToTrain.save(m_modelPath+"subModel"+std::to_string(i)+".xml",
+                               m_modelPath+"subK"+std::to_string(i)+".xml");
+    }
+    fitMainModel_faceFeat(-1,false);
 }
 
 bool ELM_IN_ELM_Model::isEmpty()

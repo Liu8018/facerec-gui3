@@ -26,6 +26,7 @@ public:
     void fit(int batchSize = -1, bool validating = true, bool verbose = true);
     
     void trainNewImg(const cv::Mat &img, const std::string label);
+    void trainNewFace(const cv::Mat &feat, const std::vector<bool> &labelBin);
     
     //查询
     void query(const cv::Mat &mat, std::string &label);
