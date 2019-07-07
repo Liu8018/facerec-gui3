@@ -38,7 +38,7 @@ public:
     
     //得到前n个最大值ID
     void query(const cv::Mat &mat, int n, std::vector<std::string> &names);
-    void queryFace(const cv::Mat &faceImg, int n, std::vector<std::string> &names);
+    void queryFace(const cv::Mat &feat, int n, std::vector<std::string> &names);
     
     void clearTrainData();
     

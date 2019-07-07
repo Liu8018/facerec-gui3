@@ -63,22 +63,20 @@ std::string FaceRecognition::recognize_resnetOnly(const cv::Mat &faceImg)
     */
 }
 
-void FaceRecognition::getCandidatesByELM(const cv::Mat &faceImg, int n, std::vector<std::string> &candidates)
+void FaceRecognition::getCandidatesByELM(const cv::Mat &feat, int n, std::vector<std::string> &candidates)
 {
     if(m_eieModel.isEmpty())
         m_eieModel.load(ELM_MODEL_PATH);
     
     //ELM得到候选
-    m_eieModel.queryFace(faceImg,n,candidates);
+    m_eieModel.queryFace(feat,n,candidates);
 }
 
-std::string FaceRecognition::recognize_byFeat(const cv::Mat &faceImg, 
+std::string FaceRecognition::recognize_byFeat(const cv::Mat &feat, 
                                               const std::vector<std::string> &candidates,
                                               std::vector<float> &sims)
 {
     //特征提取
-    cv::Mat feat;
-    g_featEX.extract(faceImg,feat);
     cv::Mat feats;
     std::vector<std::string> names;
     g_featEX.loadFeats(candidates,feats,names);

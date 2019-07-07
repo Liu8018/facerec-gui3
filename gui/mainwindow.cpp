@@ -134,10 +134,12 @@ void MainWindow::updateFrame()
             {
                 int n = NCANDIDATES;
                 std::vector<std::string> candidates;
-                g_faceRC.getCandidatesByELM(m_faceROI,n,candidates);
+                cv::Mat feat;
+                g_featEX.extract(m_faceROI,feat);
+                g_faceRC.getCandidatesByELM(feat,n,candidates);
                 
                 std::vector<float> sims;
-                name = g_faceRC.recognize_byFeat(m_faceROI,candidates,sims);
+                name = g_faceRC.recognize_byFeat(feat,candidates,sims);
                 
                 showNames(candidates,sims);
                 

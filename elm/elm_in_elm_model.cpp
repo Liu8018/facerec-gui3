@@ -499,13 +499,10 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
         names.push_back(m_label_string[maxIds[i]]);
 }
 
-void ELM_IN_ELM_Model::queryFace(const cv::Mat &faceImg, int n, std::vector<std::string> &names)
+void ELM_IN_ELM_Model::queryFace(const cv::Mat &feat, int n, std::vector<std::string> &names)
 {
     if(m_F.empty())
         return;
-    
-    cv::Mat feat;
-    faceImgPreprocessing(faceImg,feat);
     
     if(n>m_C)
         n = m_C;
