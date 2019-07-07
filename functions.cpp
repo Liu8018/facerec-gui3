@@ -19,7 +19,7 @@ void refitEIEModel()
         eieModel.setSubModelHiddenNodes(i,ELM_NHIDDENNODES);//超参3:elm隐藏层节点数
     
     eieModel.fitSubModels_faceFeat();
-    eieModel.fitMainModel();
+    eieModel.fitMainModel_faceFeat();
     
     eieModel.save();
 }
@@ -407,7 +407,16 @@ void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats, std:
     
     for(size_t i=1;i<imgs.size();i++)
     {
-        faceImgPreprocessing(imgs[i],feat);
+        cv::Mat img2 = imgs[i].clone();
+        //缩放为标准尺寸
+        cv::resize(img2,img2,FACE_IMGSIZE);
+        
+        //均衡化
+        equalizeIntensity(img2);
+        
+        //特征提取
+        g_featEX.extract(img2,feat);
+        
         feat.copyTo(feats.rowRange(i,i+1));
     }
     

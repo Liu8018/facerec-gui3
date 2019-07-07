@@ -34,6 +34,7 @@ private:
     QTimer *m_timer = new QTimer(this);
     
     void showMat();
+    void showNames(const std::vector<std::string> &candidates, const std::vector<float> &sims);
     
 private slots:
     void updateFrame();

@@ -77,6 +77,22 @@ background-image: url(:/icons/data/icons/BIT.jpg);</string>
      <string/>
     </property>
    </widget>
+   <widget class="QLabel" name="label_names">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>70</y>
+      <width>251</width>
+      <height>331</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(238, 238, 236);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

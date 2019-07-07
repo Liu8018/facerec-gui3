@@ -11,7 +11,6 @@ FeatExtraction::FeatExtraction()
 {
     m_method.assign(FEATEX_METHOD);
     
-    std::cout<<"SHAPE_PREDICTOR_PATH:"<<SHAPE_PREDICTOR_PATH<<std::endl;
     dlib::deserialize(SHAPE_PREDICTOR_PATH) >> m_shapePredictor;
     
     if(m_method == "resnet")
@@ -130,24 +129,6 @@ void cvRect2dlibRect(const cv::Rect &cvRec, dlib::rectangle &dlibRec)
     dlibRec = dlib::rectangle((long)cvRec.tl().x, (long)cvRec.tl().y, (long)cvRec.br().x - 1, (long)cvRec.br().y - 1);
 }
 
-void FeatExtraction::getShape(const cv::Mat &inputImg, const cv::Rect &faceRect, dlib::full_object_detection &shape)
-{
-    //转换opencv图像为dlib图像
-    dlib::cv_image<dlib::bgr_pixel> cimg(inputImg);
-
-    //提取脸部特征点(68个),存储在shape
-    dlib::rectangle face_dlibRect;
-    cvRect2dlibRect(faceRect,face_dlibRect);
-    shape = m_shapePredictor(cimg,face_dlibRect);
-    
-    /*
-    cv::Mat testImg = inputImg.clone();
-    drawShape(testImg,shape);
-    cv::imshow("test",testImg);
-    cv::waitKey();
-    */
-}
-
 void drawShape(cv::Mat &img, dlib::full_object_detection shape)
 {
     //shape转化为landmarks
@@ -160,6 +141,29 @@ void drawShape(cv::Mat &img, dlib::full_object_detection shape)
         cv::circle(img,landmarks[i],3,cv::Scalar(0,255,0),-1);
         cv::putText(img,std::to_string(i),landmarks[i],1,0.8,cv::Scalar(255,0,0));
     }
+}
+
+void FeatExtraction::getShape(const cv::Mat &inputImg, const cv::Rect &faceRect, dlib::full_object_detection &shape)
+{
+    cv::Mat img2 = inputImg.clone();
+    if(inputImg.channels()==1)
+        cv::cvtColor(img2,img2,cv::COLOR_GRAY2BGR);
+    
+    //转换opencv图像为dlib图像
+    dlib::cv_image<dlib::bgr_pixel> cimg(img2);
+
+    //提取脸部特征点(68个),存储在shape
+    dlib::rectangle face_dlibRect;
+    cvRect2dlibRect(faceRect,face_dlibRect);
+    shape = m_shapePredictor(cimg,face_dlibRect);
+    
+    /*
+    cv::Mat testImg = inputImg.clone();
+    drawShape(testImg,shape);
+    cv::imshow("test",testImg);
+    cv::waitKey();
+    */
+    
 }
 
 void modifyROI(const cv::Size imgSize, cv::Rect &rect)
@@ -273,12 +277,41 @@ void FeatExtraction::saveFeats_overwrite(std::vector<std::string> names, const c
 void FeatExtraction::loadFeats(const std::vector<std::string> &candidates, 
                                cv::Mat &feats, std::vector<std::string> &names)
 {
-    /*
+    cv::Mat tmpFeats;
+    std::vector<std::string> tmpNames;
+    
     cv::FileStorage fsread(FEATS_PATH,cv::FileStorage::READ);
-    fsread["names"]>>names;
-    fsread["feats"]>>feats;
+    fsread["names"]>>tmpNames;
+    fsread["feats"]>>tmpFeats;
     fsread.release();
-    */
+    
+    std::vector<cv::Mat> featList;
+    for(int i=0;i<tmpNames.size();i++)
+    {
+        std::string name = tmpNames[i];
+        
+        for(int j=0;j<candidates.size();j++)
+        {
+            if(name == candidates[j])
+            {
+                cv::Mat feat = tmpFeats.rowRange(i,i+1);
+                names.push_back(name);
+                
+                featList.push_back(feat);
+                break;
+            }
+        }
+    }
+    
+    if(featList.empty())
+        return;
+    
+    feats.create(featList.size(),featList[0].cols,CV_32F);
+    for(int i=0;i<featList.size();i++)
+    {
+        cv::Mat ROI = feats.rowRange(i,i+1);
+        featList[i].copyTo(ROI);
+    }
 }
 
 void FeatExtraction::saveFeats_resnet(std::vector<std::string> names, const cv::Mat &feats)

@@ -31,6 +31,8 @@ public:
     void query(const cv::Mat &mat, std::string &label);
     void query(const cv::Mat &mat, cv::Mat &output);
     void batchQuery(std::vector<cv::Mat> &inputMats, cv::Mat &outputMat);
+    void batchQueryFeats(const cv::Mat &feats, cv::Mat &output);
+    void queryFeat(const cv::Mat &feat, cv::Mat &output);
     
     //保存和读取模型
     void save(std::string path, std::string K_path="");

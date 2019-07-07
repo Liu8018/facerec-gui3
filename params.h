@@ -19,6 +19,7 @@ const std::string FACEDT_MODELCONF_PATH = "./data/models/opencv_face_detector.pb
 
 //特征提取
 const std::string FEATEX_METHOD = "resnet";
+//const std::string FEATCMP_METHOD = "resnet";
 const std::string SHAPE_PREDICTOR_PATH = "./data/models/shape_predictor_68_face_landmarks.dat";
 const std::string RESNET_MODEL_PATH = "./data/models/dlib_face_recognition_resnet_model_v1.dat";
 const std::string RESNET_FEATS_PATH = "./data/face_database/resnetFeats.xml";

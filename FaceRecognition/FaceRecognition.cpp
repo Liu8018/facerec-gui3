@@ -7,12 +7,7 @@ FaceRecognition g_faceRC;
 
 FaceRecognition::FaceRecognition()
 {
-    if(REC_METHOD == "elm")
-    {
-        if(access((ELM_MODEL_PATH + "/mainModel.xml").data(),F_OK) == -1)
-            handleFaceDb(1);
-        m_eieModel.load(ELM_MODEL_PATH);
-    }
+    
 }
 
 std::string FaceRecognition::recognize_resnetOnly(const cv::Mat &faceImg)
@@ -70,6 +65,9 @@ std::string FaceRecognition::recognize_resnetOnly(const cv::Mat &faceImg)
 
 void FaceRecognition::getCandidatesByELM(const cv::Mat &faceImg, int n, std::vector<std::string> &candidates)
 {
+    if(m_eieModel.isEmpty())
+        m_eieModel.load(ELM_MODEL_PATH);
+    
     //ELM得到候选
     m_eieModel.queryFace(faceImg,n,candidates);
 }
@@ -84,9 +82,10 @@ std::string FaceRecognition::recognize_byFeat(const cv::Mat &faceImg,
     cv::Mat feats;
     std::vector<std::string> names;
     g_featEX.loadFeats(candidates,feats,names);
+    std::cout<<"names.size():"<<names.size()<<std::endl;
     
     //相似度：特征夹角余弦
-    float maxSim = 0;
+    float maxSim = -1;
     std::string maxSimName;
     std::map<std::string,float> candidate_sim;
     for(size_t i=0;i<candidates.size();i++)
@@ -99,6 +98,7 @@ std::string FaceRecognition::recognize_byFeat(const cv::Mat &faceImg,
         float c = cv::norm(feat-feat2);
         
         float cos = (a*a + b*b - c*c)/(2*a*b);
+        std::cout<<"cos:"<<cos<<std::endl;
         
         if(cos > maxSim)
         {
@@ -107,6 +107,7 @@ std::string FaceRecognition::recognize_byFeat(const cv::Mat &faceImg,
         }
         
         float nameMaxSim = candidate_sim.find(names[i])->second;
+        std::cout<<"nameMaxSim:"<<nameMaxSim<<std::endl;
         if(cos > nameMaxSim)
             candidate_sim.find(names[i])->second = cos;
     }
@@ -117,5 +118,8 @@ std::string FaceRecognition::recognize_byFeat(const cv::Mat &faceImg,
         sims.push_back(sim);
     }
     
-    return maxSimName;
+    if(maxSim > MINSIMILARITY_RESNET)
+        return maxSimName;
+    else
+        return "others";
 }

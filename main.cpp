@@ -9,6 +9,12 @@ int main(int argc, char *argv[])
     std::string strArgv(argv[1]);
     if(strArgv.find("updatedb") == std::string::npos)
     {
+        if(argc < 3)
+        {
+            std::cout<<"parameters error!"<<std::endl;
+            return 0;
+        }
+        
         VIDEO_FILE = argv[2];
     }
 

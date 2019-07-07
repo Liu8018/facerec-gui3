@@ -25,6 +25,7 @@ public:
     void fitSubModels(int batchSize = -1, bool validating = true, bool verbose = true);
     void fitSubModels_faceFeat(int batchSize = -1, bool validating = true, bool verbose = true);
     void fitMainModel(int batchSize = -1, bool validating = true, bool verbose = true);
+    void fitMainModel_faceFeat(int batchSize = -1, bool validating = true, bool verbose = true);
     
     void trainNewImg(const cv::Mat &img, const std::string label);
     void trainNewFace(const cv::Mat &img, const std::string label);
@@ -37,12 +38,14 @@ public:
     
     //得到前n个最大值ID
     void query(const cv::Mat &mat, int n, std::vector<std::string> &names);
-    void queryFace(const cv::Mat &mat, int n, std::vector<std::string> &names);
+    void queryFace(const cv::Mat &faceImg, int n, std::vector<std::string> &names);
     
     void clearTrainData();
     
     //计算在测试数据上的准确率
     float validate();
+    
+    bool isEmpty();
     
 private:
     std::vector<std::vector<cv::Mat>> m_allFeats;

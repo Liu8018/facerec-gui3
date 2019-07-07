@@ -6,13 +6,14 @@ FaceDetection g_faceDT;
 
 FaceDetection::FaceDetection()
 {
-    m_net = cv::dnn::readNetFromTensorflow(
-                FACEDT_MODEL_PATH,
-                FACEDT_MODELCONF_PATH);
+    
 }
 
 void FaceDetection::detect(const cv::Mat &img, std::vector<cv::Rect> &boxes)
 {
+    if(m_net.empty())
+        m_net = cv::dnn::readNetFromTensorflow(FACEDT_MODEL_PATH,FACEDT_MODELCONF_PATH);
+    
     boxes.clear();
     
     cv::Mat blob = cv::dnn::blobFromImage(img,1.0,cv::Size(300,300),cv::Scalar(104,117,123),true,false);

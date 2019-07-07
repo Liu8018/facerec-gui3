@@ -31,6 +31,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_timer,SIGNAL(timeout()),this,SLOT(updateFrame()));
     m_timer->setInterval(1000/m_capture.get(cv::CAP_PROP_FPS));
     m_timer->start();
+    
+    //
+    ui->label_names->setStyleSheet("background:transparent;color:blue");
+    ui->label_names->setFont(QFont("Microsoft YaHei", 18, 75));
+    ui->label_names->setAlignment(Qt::AlignTop);
 }
 
 MainWindow::~MainWindow()
@@ -76,6 +81,24 @@ void MainWindow::on_pushButton_SignUp_clicked()
     m_timer->start();
 }
 
+void MainWindow::showNames(const std::vector<std::string> &candidates, const std::vector<float> &sims)
+{
+    std::map<float,std::string> score_names;
+    for(int i=0;i<candidates.size();i++)
+        score_names.insert(std::pair<float,std::string>(sims[i],candidates[i]));
+    
+    QString qstr;
+    //反向遍历并输出
+    for(std::map<float,std::string>::reverse_iterator it = score_names.rbegin();it!=score_names.rend();it++)
+    {
+        qstr.append(it->second.data());
+        qstr.append(":");
+        qstr.append(std::to_string(it->first).substr(0,6).data());
+        qstr.append("\n");
+    }
+    ui->label_names->setText(qstr);
+}
+
 void MainWindow::updateFrame()
 {
     m_capture >> m_frameSrc;
@@ -107,23 +130,20 @@ void MainWindow::updateFrame()
                 name = g_faceRC.recognize_resnetOnly(m_faceROI);
             }
             
-            /*
-            if(m_rec.method == "elm")
+            if(REC_METHOD == "elm")
             {
                 int n = 5;
-                std::map<float,std::string> nameScores;
-                isInFaceDb = m_rec.recognize(m_faceROI,n,nameScores);
+                std::vector<std::string> candidates;
+                g_faceRC.getCandidatesByELM(m_faceROI,n,candidates);
                 
-                showNames(nameScores);
+                std::vector<float> sims;
+                name = g_faceRC.recognize_byFeat(m_faceROI,candidates,sims);
                 
-                //for(int i=0;i<n;i++)
-                //    std::cout<<"names["<<i<<"]:"<<names[i]<<std::endl;
+                showNames(candidates,sims);
                 
-                if(!nameScores.empty())
-                    name = nameScores.rbegin()->second;
-                else
-                    name = "others";
-            }*/
+                for(int i=0;i<n;i++)
+                    std::cout<<"name:"<<candidates[i]<<"sim:"<<sims[i]<<std::endl;
+            }
             
             //显示识别结果
             cv::putText(m_frame,name,objects[0].tl(),1,2,cv::Scalar(255,100,0),2);

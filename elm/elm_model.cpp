@@ -326,6 +326,30 @@ void ELM_Model::batchQuery(std::vector<cv::Mat> &inputMats, cv::Mat &outputMat)
     outputMat = H * m_W_HO;
 }
 
+void ELM_Model::batchQueryFeats(const cv::Mat &feats, cv::Mat &output)
+{
+    cv::Mat inputdata = feats.clone();
+    normalize(inputdata);
+    
+    cv::Mat H = inputdata * m_W_IH;
+    addBias(H,m_B_H);
+    activate(H,m_activationMethod);
+    
+    output = H * m_W_HO;
+}
+
+void ELM_Model::queryFeat(const cv::Mat &feat, cv::Mat &output)
+{
+    cv::Mat inputdata = feat.clone();
+    normalize(inputdata);
+    
+    cv::Mat H = inputdata * m_W_IH;
+    addBias(H,m_B_H);
+    activate(H,m_activationMethod);
+    
+    output = H * m_W_HO;
+}
+
 void ELM_Model::save(std::string path, std::string K_path)
 {
     if(m_W_HO.empty())
