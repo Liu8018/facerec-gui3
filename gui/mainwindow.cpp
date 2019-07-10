@@ -9,6 +9,7 @@
 #include <opencv2/highgui.hpp>
 
 const int NCANDIDATES = 5;
+const float ELMREC_THRESHOLD = 0.6;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -83,8 +84,39 @@ void MainWindow::on_pushButton_SignUp_clicked()
     m_timer->start();
 }
 
-void MainWindow::showNames(const std::vector<std::string> &candidates, const std::vector<float> &sims)
+void orderNamesBySims(std::vector<std::string> &candidates, std::vector<float> &sims)
 {
+    for(int i=0;i<sims.size();i++)
+    {
+        for(int j=i+1;j<sims.size();j++)
+        {
+            if(sims[j] > sims[i])
+            {
+                float tmpSim = sims[i];
+                sims[i] = sims[j];
+                sims[j] = tmpSim;
+                
+                std::string tmpCandidate = candidates[i];
+                candidates[i] = candidates[j];
+                candidates[j] = tmpCandidate;
+            }
+        }
+    }
+}
+
+void MainWindow::showNames(std::vector<std::string> &candidates, std::vector<float> &sims)
+{
+    QString qstr;
+    for(int i=0;i<sims.size();i++)
+    {
+        qstr.append(candidates[i].data());
+        qstr.append(":");
+        qstr.append(std::to_string(sims[i]).substr(0,6).data());
+        qstr.append("\n");
+    }
+    ui->label_names->setText(qstr);
+    
+    /*
     std::map<float,std::string> score_names;
     for(int i=0;i<candidates.size();i++)
         score_names.insert(std::pair<float,std::string>(sims[i],candidates[i]));
@@ -99,6 +131,7 @@ void MainWindow::showNames(const std::vector<std::string> &candidates, const std
         qstr.append("\n");
     }
     ui->label_names->setText(qstr);
+    */
 }
 
 void MainWindow::updateFrame()
@@ -129,29 +162,30 @@ void MainWindow::updateFrame()
              
             if(REC_METHOD == "resnet")
             {
-                //cv::Mat face = m_faceROI.clone();
-                //equalizeIntensity(face);
-                name = g_faceRC.recognize_resnetOnly(/*face*/m_faceROI);
+                name = g_faceRC.recognize_resnetOnly(m_faceROI);
             }
             
             if(REC_METHOD == "elm")
             {
                 int n = NCANDIDATES;
+                std::vector<float> sims;
                 std::vector<std::string> candidates;
                 cv::Mat feat;
-                g_featEX.extract(m_faceROI,feat);
-                g_faceRC.getCandidatesByELM(feat,n,candidates);
+                faceImgPreprocessing(m_faceROI,feat);
+                g_faceRC.getCandidatesByELM(feat,n,candidates,sims);
                 
-                std::vector<float> sims;
                 //name = g_faceRC.recognize_byFeat(feat,candidates,sims);
                 
-                for(int i=0;i<candidates.size();i++)
-                    sims.push_back(5-i);
+                orderNamesBySims(candidates,sims);
+                if(sims[0] >= ELMREC_THRESHOLD)
+                    name = candidates[0];
+                else
+                    name = "others";
                 
                 showNames(candidates,sims);
                 
                 //for(int i=0;i<n;i++)
-                //    std::cout<<"name:"<<candidates[i]<<"sim:"<<sims[i]<<std::endl;
+                //    std::cout<<"name:"<<candidates[i]<<" sim:"<<sims[i]<<std::endl;
             }
             
             //绘制识别结果

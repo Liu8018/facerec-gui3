@@ -3,7 +3,7 @@
 #include "params.h"
 #include "functions.h"
 
-const float MINSIMILARITY_RESNET = 0.95;
+const float MINSIMILARITY_RESNET = 0.96;
 
 FaceRecognition g_faceRC;
 
@@ -65,13 +65,15 @@ std::string FaceRecognition::recognize_resnetOnly(const cv::Mat &faceImg)
     */
 }
 
-void FaceRecognition::getCandidatesByELM(const cv::Mat &feat, int n, std::vector<std::string> &candidates)
+void FaceRecognition::getCandidatesByELM(const cv::Mat &feat, int n, std::vector<std::string> &candidates, std::vector<float> &sims)
 {
     if(m_eieModel.isEmpty())
+    {
         m_eieModel.load(ELM_MODEL_PATH);
+    }
     
     //ELM得到候选
-    m_eieModel.queryFace(feat,n,candidates);
+    m_eieModel.queryFace(feat,n,candidates,sims);
 }
 
 std::string FaceRecognition::recognize_byFeat(const cv::Mat &feat, 

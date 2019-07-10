@@ -370,7 +370,7 @@ void faceImgPreprocessing(const cv::Mat &img, cv::Mat &feat)
     g_featEX.extract(img2,feat);
     
     //归一化
-    normalize(feat);
+    //normalize(feat);
 }
 
 void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats)
@@ -392,19 +392,7 @@ void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats)
 
 void faceImgPreprocessing(const cv::Mat &img, cv::Mat &feat, std::string name)
 {
-    cv::Mat img2 = img.clone();
-    
-    //缩放为标准尺寸
-    cv::resize(img2,img2,FACE_IMGSIZE);
-    
-    //均衡化
-    //equalizeIntensity(img2);
-    
-    //特征提取
-    g_featEX.extract(img2,feat);
-    
-    //归一化
-    normalize(feat);
+    faceImgPreprocessing(img,feat);
     
     //输出
     g_featEX.saveFeat_add(name,feat);
@@ -422,19 +410,7 @@ void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats, std:
     
     for(size_t i=1;i<imgs.size();i++)
     {
-        cv::Mat img2 = imgs[i].clone();
-        //缩放为标准尺寸
-        cv::resize(img2,img2,FACE_IMGSIZE);
-        
-        //均衡化
-        //equalizeIntensity(img2);
-        
-        //特征提取
-        g_featEX.extract(img2,feat);
-        
-        //归一化
-        normalize(feat);
-        
+        faceImgPreprocessing(imgs[i],feat);
         feat.copyTo(feats.rowRange(i,i+1));
     }
     

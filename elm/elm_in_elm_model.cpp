@@ -92,11 +92,11 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
     faceImgPreprocessing(m_testImgs,m_faceFeats_test,names_test);
     
     //test
-    //for(int i=0;i<m_faceFeats.rows;i++)
-    //{
-    //    std::cout<<"fileName:"<<names_train[i]<<std::endl;
-    //    std::cout<<"resnet feat:\n"<<m_faceFeats.rowRange(i,i+1)<<std::endl;
-    //}
+    for(int i=0;i<m_faceFeats.rows;i++)
+    {
+        std::cout<<"name:"<<names_train[i]<<std::endl;
+        std::cout<<"resnet feat:\n"<<m_faceFeats.rowRange(i,i+1)<<std::endl;
+    }
     
     m_C = m_label_string.size();
     m_Q = m_trainImgs.size();
@@ -323,8 +323,9 @@ void ELM_IN_ELM_Model::fitMainModel_faceFeat(int batchSize, bool validating, boo
         {
             cv::Mat ROI = H(cv::Range(0,batchSize),cv::Range(m*m_C,(m+1)*m_C));
             m_subModels[m].batchQueryFeats(batchTrainFeats,ROI);
-            std::cout<<"subModel["<<m<<"]:\n"<<ROI<<std::endl;
-            std::cout<<"subModel["<<m<<"]:\n"<<binMat(ROI)<<std::endl;
+            //std::cout<<"subModel["<<m<<"]:\n"<<ROI<<std::endl;
+            //std::cout<<"subModel["<<m<<"]:\n"<<binMat(ROI)<<std::endl;
+            binMat(ROI).copyTo(ROI);
         }
         batchTarget = allTarget(cv::Range(i,i+batchSize),cv::Range(0,m_C));
         
@@ -344,8 +345,8 @@ void ELM_IN_ELM_Model::fitMainModel_faceFeat(int batchSize, bool validating, boo
                 
                 //计算在该批次训练数据上的准确率
                 cv::Mat output = H * m_F;
-                std::cout<<"mainModel:\n"<<output<<std::endl;
-                std::cout<<"mainModel:\n"<<binMat(output)<<std::endl;
+                //std::cout<<"mainModel:\n"<<output<<std::endl;
+                //std::cout<<"mainModel:\n"<<binMat(output)<<std::endl;
                 float score = calcScore(output,batchTarget);
                 std::cout<<"Score on batch training data:"<<score<<std::endl;
                 
@@ -477,6 +478,7 @@ void ELM_IN_ELM_Model::queryFace(const cv::Mat &mat, std::string &label)
     {
         cv::Mat ROI = H(cv::Range(0,1),cv::Range(m*m_C,(m+1)*m_C));
         m_subModels[m].queryFeat(mat,ROI);
+        binMat(ROI).copyTo(ROI);
     }
     
     cv::Mat output = H * m_F;
@@ -524,24 +526,52 @@ void ELM_IN_ELM_Model::queryFace(const cv::Mat &feat, int n, std::vector<std::st
     {
         cv::Mat ROI = H(cv::Range(0,1),cv::Range(m*m_C,(m+1)*m_C));
         m_subModels[m].queryFeat(feat,ROI);
-        std::cout<<"subModel["<<m<<"]:\n"<<ROI/*binMat(ROI)*/<<std::endl;
-        std::cout<<"subModel["<<m<<"]:\n"<<binMat(ROI)<<std::endl;
+        //std::cout<<"subModel["<<m<<"]:\n"<<ROI/*binMat(ROI)*/<<std::endl;
+        //std::cout<<"subModel["<<m<<"]:\n"<<binMat(ROI)<<std::endl;
+        binMat(ROI).copyTo(ROI);
     }
     
     cv::Mat output = H * m_F;
-    std::cout<<"mainModel:\n"<<output/*binMat(output)*/<<std::endl;
+    //std::cout<<"mainModel:\n"<<output/*binMat(output)*/<<std::endl;
     
     //test
-    for(int i=0;i<output.cols;i++)
-    {
-        std::cout<<m_label_string[i]<<":"<<output.at<float>(0,i)<<std::endl;
-    }
+    //for(int i=0;i<output.cols;i++)
+    //    std::cout<<m_label_string[i]<<":"<<output.at<float>(0,i)<<std::endl;
     
     std::vector<int> maxIds;
     getMaxNId(output,n,maxIds);
     
     for(size_t i=0;i<n;i++)
         names.push_back(m_label_string[maxIds[i]]);
+}
+
+void ELM_IN_ELM_Model::queryFace(const cv::Mat &feat, int n, std::vector<std::string> &names, std::vector<float> &sims)
+{
+    if(m_F.empty())
+        return;
+    
+    if(n>m_C)
+        n = m_C;
+    
+    cv::Mat H(cv::Size(m_n_models*m_C,1),CV_32F);
+    
+    for(int m=0;m<m_n_models;m++)
+    {
+        cv::Mat ROI = H(cv::Range(0,1),cv::Range(m*m_C,(m+1)*m_C));
+        m_subModels[m].queryFeat(feat,ROI);
+        binMat(ROI).copyTo(ROI);
+    }
+    
+    cv::Mat output = H * m_F;
+    
+    std::vector<int> maxIds;
+    getMaxNId(output,n,maxIds);
+    
+    for(size_t i=0;i<n;i++)
+    {
+        names.push_back(m_label_string[maxIds[i]]);
+        sims.push_back(output.at<float>(0,maxIds[i]));
+    }
 }
 
 void ELM_IN_ELM_Model::clearTrainData()
@@ -618,6 +648,10 @@ void ELM_IN_ELM_Model::trainNewFace(const cv::Mat &img, const std::string label)
     
     clearTrainData_feat();
     m_faceFeats.push_back(feat);
+    
+    //std::cout<<"name"<<label<<std::endl;
+    //std::cout<<"feat:\n"<<feat<<std::endl;
+    
     std::vector<bool> labelBin(m_C,0);
     for(int i=0;i<m_label_string.size();i++)
         if(label == m_label_string[i])

@@ -254,7 +254,7 @@ void sigmoid(cv::Mat &H)
             H.at<float>(i,j) = 1.0 / ( 1.0 + std::exp(-H.at<float>(i,j)) );
 }
 
-//归一化(0-1)
+//归一化
 void normalize(cv::Mat &mat)
 {
     double minVal,maxVal;
@@ -262,7 +262,7 @@ void normalize(cv::Mat &mat)
     
     for(int i=0;i<mat.rows;i++)
         for(int j=0;j<mat.cols;j++)
-            mat.at<float>(i,j) = (mat.at<float>(i,j)-minVal) / (maxVal-minVal);
+            mat.at<float>(i,j) = (mat.at<float>(i,j)-minVal) / (maxVal-minVal) - 0.5;
 }
 
 void normalize_img(cv::Mat &mat)
@@ -323,7 +323,7 @@ void getMaxNId(const cv::Mat &line, int n, std::vector<int> &ids)
     
     ids.resize(n);
     
-    float minVal = line.at<float>(0,getMinId(line));
+    float minVal = line.at<float>(0,getMinId(line))-1;
     
     for(int i=0;i<n;i++)
     {
