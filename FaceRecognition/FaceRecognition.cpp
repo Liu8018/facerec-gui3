@@ -129,3 +129,10 @@ void FaceRecognition::EIEtrainNewFace(const cv::Mat &faceImg, std::string name)
     
     m_eieModel.save();
 }
+
+void FaceRecognition::reloadEIE()
+{
+    m_eieModel = ELM_IN_ELM_Model();
+    
+    m_eieModel.load(ELM_MODEL_PATH);
+}

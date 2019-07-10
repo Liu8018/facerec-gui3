@@ -239,8 +239,11 @@ void MainWindow::addFace(std::string name)
     }
     if(REC_METHOD == "elm")
     {
-        if(isNewClass)
+        if(isNewClass)//需改进
+        {
             refitEIEModel();
+            g_faceRC.reloadEIE();
+        }
         else
         {
             g_faceRC.EIEtrainNewFace(m_faceROI,name);
