@@ -80,6 +80,8 @@ std::string FaceRecognition::recognize_byFeat(const cv::Mat &feat,
                                               const std::vector<std::string> &candidates,
                                               std::vector<float> &sims)
 {
+    sims.clear();
+    
     //特征提取
     cv::Mat feats;
     std::vector<std::string> names;

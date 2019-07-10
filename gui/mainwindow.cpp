@@ -9,7 +9,7 @@
 #include <opencv2/highgui.hpp>
 
 const int NCANDIDATES = 5;
-const float ELMREC_THRESHOLD = 0.6;
+const float ELMREC_THRESHOLD = 0.7;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -177,6 +177,7 @@ void MainWindow::updateFrame()
                 //name = g_faceRC.recognize_byFeat(feat,candidates,sims);
                 
                 orderNamesBySims(candidates,sims);
+                
                 if(sims[0] >= ELMREC_THRESHOLD)
                     name = candidates[0];
                 else
@@ -247,6 +248,7 @@ void MainWindow::addFace(std::string name)
         else
         {
             g_faceRC.EIEtrainNewFace(m_faceROI,name);
+            g_faceRC.reloadEIE();
         }
     }
 }
