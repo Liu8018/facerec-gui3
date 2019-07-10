@@ -41,6 +41,7 @@ public:
     void queryFace(const cv::Mat &feat, int n, std::vector<std::string> &names);
     
     void clearTrainData();
+    void clearTrainData_feat();
     
     //计算在测试数据上的准确率
     float validate();

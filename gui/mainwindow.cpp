@@ -8,6 +8,8 @@
 #include "functions.h"
 #include <opencv2/highgui.hpp>
 
+const int NCANDIDATES = 5;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -127,7 +129,9 @@ void MainWindow::updateFrame()
              
             if(REC_METHOD == "resnet")
             {
-                name = g_faceRC.recognize_resnetOnly(m_faceROI);
+                //cv::Mat face = m_faceROI.clone();
+                //equalizeIntensity(face);
+                name = g_faceRC.recognize_resnetOnly(/*face*/m_faceROI);
             }
             
             if(REC_METHOD == "elm")
@@ -139,7 +143,10 @@ void MainWindow::updateFrame()
                 g_faceRC.getCandidatesByELM(feat,n,candidates);
                 
                 std::vector<float> sims;
-                name = g_faceRC.recognize_byFeat(feat,candidates,sims);
+                //name = g_faceRC.recognize_byFeat(feat,candidates,sims);
+                
+                for(int i=0;i<candidates.size();i++)
+                    sims.push_back(5-i);
                 
                 showNames(candidates,sims);
                 
@@ -147,7 +154,7 @@ void MainWindow::updateFrame()
                 //    std::cout<<"name:"<<candidates[i]<<"sim:"<<sims[i]<<std::endl;
             }
             
-            //显示识别结果
+            //绘制识别结果
             cv::putText(m_frame,name,objects[0].tl(),1,2,cv::Scalar(255,100,0),2);
         }
     }

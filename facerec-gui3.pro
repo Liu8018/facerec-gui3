@@ -59,7 +59,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 INCLUDEPATH += $$PWD/../include
-LIBS += -L$$PWD/../libs/ -ldlib -lpthread -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgproc -lopencv_imgcodecs -lopencv_dnn
+LIBS += -L$$PWD/../libs/ -ldlib -lpthread -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgproc -lopencv_imgcodecs -lopencv_dnn -lfacedetection
 
 RESOURCES += \
     gui/resources.qrc

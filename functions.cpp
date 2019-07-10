@@ -6,6 +6,11 @@
 #include "params.h"
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+#include "elm/ELM_functions.h"
+
+const cv::Size FACE_IMGSIZE = cv::Size(50,50);
+const int ELM_MODELS_COUNT = 10;
+const int ELM_NHIDDENNODES = 50;
 
 void refitEIEModel()
 {
@@ -50,6 +55,10 @@ void updateResnetDb()
         names.push_back(it->second);
         feat.copyTo(feats.rowRange(id,id+1));
         id++;
+        
+        //test
+        //std::cout<<"fileName:"<<it->second<<std::endl;
+        //std::cout<<"resnet feat:\n"<<feat<<std::endl;
     }
     
     g_featEX.saveFeats_resnet(names,feats);
@@ -355,10 +364,13 @@ void faceImgPreprocessing(const cv::Mat &img, cv::Mat &feat)
     cv::resize(img2,img2,FACE_IMGSIZE);
     
     //均衡化
-    equalizeIntensity(img2);
+    //equalizeIntensity(img2);
     
     //特征提取
     g_featEX.extract(img2,feat);
+    
+    //归一化
+    normalize(feat);
 }
 
 void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats)
@@ -386,10 +398,13 @@ void faceImgPreprocessing(const cv::Mat &img, cv::Mat &feat, std::string name)
     cv::resize(img2,img2,FACE_IMGSIZE);
     
     //均衡化
-    equalizeIntensity(img2);
+    //equalizeIntensity(img2);
     
     //特征提取
     g_featEX.extract(img2,feat);
+    
+    //归一化
+    normalize(feat);
     
     //输出
     g_featEX.saveFeat_add(name,feat);
@@ -412,10 +427,13 @@ void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats, std:
         cv::resize(img2,img2,FACE_IMGSIZE);
         
         //均衡化
-        equalizeIntensity(img2);
+        //equalizeIntensity(img2);
         
         //特征提取
         g_featEX.extract(img2,feat);
+        
+        //归一化
+        normalize(feat);
         
         feat.copyTo(feats.rowRange(i,i+1));
     }

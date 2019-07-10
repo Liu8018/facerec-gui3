@@ -1,7 +1,8 @@
 #ifndef FACEDETECTOR_H
 #define FACEDETECTOR_H
 
-#include <opencv2/dnn.hpp>
+#include "facedetectcnn.h"
+#include <opencv2/core.hpp>
 
 class FaceDetection
 {
@@ -11,7 +12,11 @@ public:
     void detect(const cv::Mat &img, std::vector<cv::Rect> &boxes);
     
 private:
-    cv::dnn::Net m_net;
+    int * pResults;
+    unsigned char * pBuffer;
+    
+    int resizeWidth;
+    float resizeRatio;
 };
 
 extern FaceDetection g_faceDT;

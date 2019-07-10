@@ -69,8 +69,6 @@ void ELM_Model::inputData_1d(const cv::Mat &data, const std::vector<std::vector<
     
     data.copyTo(m_inputLayerData);
     
-    normalize(m_inputLayerData);
-    
     m_I = m_inputLayerData.cols;
 }
 
@@ -101,8 +99,6 @@ void ELM_Model::inputData_1d_test(const cv::Mat &data, const std::vector<std::ve
     label2target(labels,m_Target_test);
     
     data.copyTo(m_inputLayerData_test);
-    
-    normalize(m_inputLayerData_test);
 }
 
 void ELM_Model::loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle)
@@ -263,7 +259,7 @@ void ELM_Model::query(const cv::Mat &mat, std::string &label)
     cv::Mat tmpImg;
     cv::resize(mat,tmpImg,cv::Size(m_width,m_height));
     mat2line(tmpImg,inputLine,m_channels);
-    normalize_img(inputLine);
+    normalize(inputLine);
     
     //乘权重，加偏置，激活
     cv::Mat H = inputLine * m_W_IH;
@@ -329,7 +325,6 @@ void ELM_Model::batchQuery(std::vector<cv::Mat> &inputMats, cv::Mat &outputMat)
 void ELM_Model::batchQueryFeats(const cv::Mat &feats, cv::Mat &output)
 {
     cv::Mat inputdata = feats.clone();
-    normalize(inputdata);
     
     cv::Mat H = inputdata * m_W_IH;
     addBias(H,m_B_H);
@@ -341,7 +336,6 @@ void ELM_Model::batchQueryFeats(const cv::Mat &feats, cv::Mat &output)
 void ELM_Model::queryFeat(const cv::Mat &feat, cv::Mat &output)
 {
     cv::Mat inputdata = feat.clone();
-    normalize(inputdata);
     
     cv::Mat H = inputdata * m_W_IH;
     addBias(H,m_B_H);

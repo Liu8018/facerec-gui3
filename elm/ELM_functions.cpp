@@ -365,6 +365,19 @@ void randomGenerate(cv::Mat &mat, cv::Size size, int randomState)
         rng.state = (unsigned)time(nullptr);
     for(int i=0;i<mat.rows;i++)
         for(int j=0;j<mat.cols;j++)
-            mat.at<float>(i,j) = rng.uniform(-1.0,1.0);
+            mat.at<float>(i,j) = rng.uniform(-0.1,0.1);
 }
 
+cv::Mat binMat(const cv::Mat &mat)
+{
+    cv::Mat binMat(mat.rows,mat.cols,CV_32F,cv::Scalar(0));
+    for(int i=0;i<mat.rows;i++)
+    {
+        cv::Mat line = mat.rowRange(i,i+1);
+        int maxId = getMaxId(line);
+        
+        binMat.at<float>(i,maxId) = 1;
+    }
+    
+    return binMat;
+}

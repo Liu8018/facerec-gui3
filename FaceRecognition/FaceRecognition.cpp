@@ -3,6 +3,8 @@
 #include "params.h"
 #include "functions.h"
 
+const float MINSIMILARITY_RESNET = 0.95;
+
 FaceRecognition g_faceRC;
 
 FaceRecognition::FaceRecognition()

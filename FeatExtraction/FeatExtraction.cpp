@@ -240,11 +240,7 @@ void FeatExtraction::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::
 
 void addLine(cv::Mat &mat, const cv::Mat &line)
 {
-    int n = mat.rows+1;
-    cv::Mat newMat(n,mat.cols,CV_32F);
-    mat.copyTo(newMat.rowRange(0,n-1));
-    line.copyTo(newMat.rowRange(n-1,n));
-    newMat.copyTo(mat);
+    mat.push_back(line);
 }
 
 void FeatExtraction::saveFeat_add(std::string name, const cv::Mat &feat)

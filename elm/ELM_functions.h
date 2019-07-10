@@ -52,4 +52,6 @@ void getMaxNId(const cv::Mat &line, int n, std::vector<int> &ids);
 //计分
 float calcScore(const cv::Mat &outputData, const cv::Mat &target);
 
+cv::Mat binMat(const cv::Mat &mat);
+
 #endif // FUNCS_H
