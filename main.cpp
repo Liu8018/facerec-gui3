@@ -10,15 +10,39 @@ int main(int argc, char *argv[])
     
     if(strArgv == "clean")
     {
+        std::string cmd_rm_elmModels = "rm " + ELM_MODEL_PATH + "/*";
+        std::cout<<cmd_rm_elmModels<<std::endl;
+        system(cmd_rm_elmModels.data());
         
+        std::string cmd_rm_featsFiles = "rm " + FEATS_PATH + " " + HASH_FILE_PATH;
+        std::cout<<cmd_rm_featsFiles<<std::endl;
+        system(cmd_rm_featsFiles.data());
+        
+        std::string cmd_rm_resnetFeats = "rm " + RESNET_FEATS_PATH;
+        std::cout<<cmd_rm_resnetFeats<<std::endl;
+        system(cmd_rm_resnetFeats.data());
+        
+        return 0;
     }
     if(strArgv == "clean-elm")
     {
+        std::string cmd_rm_elmModels = "rm " + ELM_MODEL_PATH + "/*";
+        std::cout<<cmd_rm_elmModels<<std::endl;
+        system(cmd_rm_elmModels.data());
         
+        std::string cmd_rm_featsFiles = "rm " + FEATS_PATH + " " + HASH_FILE_PATH;
+        std::cout<<cmd_rm_featsFiles<<std::endl;
+        system(cmd_rm_featsFiles.data());
+        
+        return 0;
     }
     if(strArgv == "clean-resnet")
     {
+        std::string cmd_rm_resnetFeats = "rm " + RESNET_FEATS_PATH;
+        std::cout<<cmd_rm_resnetFeats<<std::endl;
+        system(cmd_rm_resnetFeats.data());
         
+        return 0;
     }
     
     if(strArgv.find("updatedb") == std::string::npos)

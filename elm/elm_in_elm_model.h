@@ -19,6 +19,8 @@ public:
     
     void loadStandardFaceDataset(const std::string path, const float trainSampleRatio,
                                  const int resizeWidth, const int resizeHeight, bool shuffle=true);
+    void inputFaceFeats(const std::vector<std::string> &label_strings, 
+                        const std::vector<std::string> &names, const cv::Mat &feats);
     
     void loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle=true);
     

@@ -23,6 +23,7 @@ const std::string SHAPE_PREDICTOR_PATH = "./data/models/shape_predictor_68_face_
 const std::string RESNET_MODEL_PATH = "./data/models/dlib_face_recognition_resnet_model_v1.dat";
 const std::string RESNET_FEATS_PATH = "./data/face_database/resnetFeats.xml";
 const std::string FEATS_PATH = "./data/face_database/feats.xml";
+const std::string HASH_FILE_PATH = FACEDB_PATH+"/hashFile.dat";
 
 //ELM模型
 const std::string ELM_MODEL_PATH = "./data/models/ELM_Models";

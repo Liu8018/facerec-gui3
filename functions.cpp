@@ -8,10 +8,8 @@
 #include <opencv2/highgui.hpp>
 #include "elm/ELM_functions.h"
 
-const std::string HASH_FILE_PATH = "";
-
 const cv::Size FACE_IMGSIZE = cv::Size(50,50);
-const int ELM_MODELS_COUNT = 12;
+const int ELM_MODELS_COUNT = 16;
 const int ELM_NHIDDENNODES = 32;
 
 void refitEIEModel()
@@ -20,7 +18,14 @@ void refitEIEModel()
     
     int nModels = ELM_MODELS_COUNT;//超参1:elm模型数目
     eieModel.setInitPara(nModels,ELM_MODEL_PATH);
-    eieModel.loadStandardFaceDataset(FACEDB_PATH,1,FACE_IMGSIZE.width,FACE_IMGSIZE.height);//超参2:resize大小
+    //eieModel.loadStandardFaceDataset(FACEDB_PATH,1,FACE_IMGSIZE.width,FACE_IMGSIZE.height);//超参2:resize大小
+    
+    std::vector<std::string> label_strings;
+    getSubDirs(FACEDB_PATH,label_strings);
+    std::vector<std::string> names;
+    cv::Mat feats;
+    g_featEX.loadFeats(feats,names);
+    eieModel.inputFaceFeats(label_strings,names,feats);
     
     for(int i=0;i<nModels;i++)
         eieModel.setSubModelHiddenNodes(i,ELM_NHIDDENNODES);//超参3:elm隐藏层节点数
@@ -219,9 +224,9 @@ bool isEmptyFaceDb()
         return false;
 }
 
-void getFiles(std::string path, std::vector<std::string> &files)
+void getSubDirs(std::string path, std::vector<std::string> &subDirs)
 {
-	DIR *dir;
+    DIR *dir;
 	struct dirent *ptr;
 
 	if(path[path.length()-1] != '/')
@@ -238,28 +243,14 @@ void getFiles(std::string path, std::vector<std::string> &files)
 		///current dir OR parrent dir 
 		if(strcmp(ptr->d_name,".")==0 || strcmp(ptr->d_name,"..")==0) 
             continue; 
-		else if(ptr->d_type == 8) //file
-		{
-			std::string fn(ptr->d_name);
-            
-            std::string tail = fn.substr(fn.length()-3,fn.length()-1);
-            if(tail == "dat" || tail == "xml")
-                continue;
-            
-			std::string p = path + fn;
-			files.push_back(p);
-		}
-		else if(ptr->d_type == 10)    ///link file
-		{}
 		else if(ptr->d_type == 4)    ///dir
 		{
-            std::string p = path + std::string(ptr->d_name);
-            getFiles(p,files);
+            subDirs.push_back(ptr->d_name);
+            std::cout<<ptr->d_name<<std::endl;
         }
 	}
 	
 	closedir(dir);
-	return ;
 }
 
 void getFiles(std::string path, std::map<std::string, std::string> &files)

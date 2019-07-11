@@ -102,6 +102,33 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
     m_Q = m_trainImgs.size();
 }
 
+void ELM_IN_ELM_Model::inputFaceFeats(const std::vector<std::string> &label_strings, 
+                                      const std::vector<std::string> &names, const cv::Mat &feats)
+{
+    m_C = label_strings.size();
+    m_Q = names.size();
+    
+    m_label_string.assign(label_strings.begin(),label_strings.end());
+    
+    feats.copyTo(m_faceFeats);
+    
+    for(size_t i=0;i<names.size();i++)
+    {
+        std::vector<bool> labelBin(m_C,0);
+        
+        for(size_t j=0;j<label_strings.size();j++)
+        {
+            if(names[i] == label_strings[j])
+            {
+                labelBin[j] = 1;
+                break;
+            }
+        }
+        
+        m_trainLabelBins.push_back(labelBin);
+    }
+}
+
 void ELM_IN_ELM_Model::loadMnistData(const std::string path, const float trainSampleRatio, bool shuffle)
 {
     loadMnistData_csv(path,trainSampleRatio,
