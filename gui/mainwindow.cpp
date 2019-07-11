@@ -86,9 +86,9 @@ void MainWindow::on_pushButton_SignUp_clicked()
 
 void orderNamesBySims(std::vector<std::string> &candidates, std::vector<float> &sims)
 {
-    for(int i=0;i<sims.size();i++)
+    for(size_t i=0;i<sims.size();i++)
     {
-        for(int j=i+1;j<sims.size();j++)
+        for(size_t j=i+1;j<sims.size();j++)
         {
             if(sims[j] > sims[i])
             {
@@ -107,7 +107,7 @@ void orderNamesBySims(std::vector<std::string> &candidates, std::vector<float> &
 void MainWindow::showNames(std::vector<std::string> &candidates, std::vector<float> &sims)
 {
     QString qstr;
-    for(int i=0;i<sims.size();i++)
+    for(size_t i=0;i<sims.size();i++)
     {
         qstr.append(candidates[i].data());
         qstr.append(":");
@@ -178,10 +178,12 @@ void MainWindow::updateFrame()
                 
                 orderNamesBySims(candidates,sims);
                 
+                // /*
                 if(sims[0] >= ELMREC_THRESHOLD)
                     name = candidates[0];
                 else
                     name = "others";
+                // */
                 
                 showNames(candidates,sims);
                 
@@ -217,16 +219,10 @@ void MainWindow::addFace(std::string name)
     filename += "/";
     
     //输出
-    if(isNewClass)
-        filename += name + ".png";
-    else
-    {
-        time_t t = time(nullptr);
-        char strTime[64];
-        strftime(strTime, 64, "%Y-%m-%d-%H-%M-%S", localtime(&t));
-        
-        filename += name+std::string(strTime) + ".png";
-    }
+    time_t t = time(nullptr);
+    char strTime[64];
+    strftime(strTime, 64, "%Y-%m-%d-%H-%M-%S", localtime(&t));
+    filename += name+std::string(strTime) + ".png";
     
     markImg(m_faceROI);
     cv::imwrite(filename,m_faceROI);

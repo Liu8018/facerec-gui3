@@ -20,7 +20,7 @@ void inputImgsFrom(const std::string datasetPath,
     
     std::vector<std::string> files;
     
-    for(int i=0;i<srcFiles.size();i++)
+    for(size_t i=0;i<srcFiles.size();i++)
     {
         //判断是否是文件夹,不是就跳过
         char const*path = srcFiles[i].data();
@@ -34,7 +34,7 @@ void inputImgsFrom(const std::string datasetPath,
     
     int classes = files.size();
     
-    for(int i=0;i<files.size();i++)
+    for(size_t i=0;i<files.size();i++)
     {
         std::cout<<"[INFO] loading data from "<<files[i]<<std::endl;
         
@@ -68,7 +68,7 @@ void inputImgsFrom(const std::string datasetPath,
                 trainLabelBins.push_back(labelBin);
             }
             
-            for(int j=trainSamples;j<subdir_files.size();j++)
+            for(size_t j=trainSamples;j<subdir_files.size();j++)
             {
                 cv::Mat src;
                 if(channels == 3)
@@ -116,7 +116,7 @@ void loadMnistData_csv(const std::string path, const float trainSampleRatio,
 
         cv::Mat img(28,28,CV_8U);
         int pixNum=0;
-        for(int i=2;i<line.size();i++)
+        for(size_t i=2;i<line.size();i++)
         {
             int value=0;
             
@@ -140,7 +140,7 @@ void loadMnistData_csv(const std::string path, const float trainSampleRatio,
         trainImgs.push_back(img);
     }
     
-    for(int j=trainSize;j<lines.size();j++)
+    for(size_t j=trainSize;j<lines.size();j++)
     {
         std::string line;
         line.assign(lines[j]);
@@ -151,7 +151,7 @@ void loadMnistData_csv(const std::string path, const float trainSampleRatio,
 
         cv::Mat img(28,28,CV_8U);
         int pixNum=0;
-        for(int i=2;i<line.size();i++)
+        for(size_t i=2;i<line.size();i++)
         {
             int value=0;
             
@@ -210,7 +210,7 @@ void mats2lines(const std::vector<cv::Mat> &mats, cv::Mat &output, const int cha
     
     output.create(cv::Size(mats[0].rows*mats[0].cols*channels,mats.size()),CV_32F);
     
-    for(int i=0;i<mats.size();i++)
+    for(size_t i=0;i<mats.size();i++)
     {
         cv::Mat lineROI = output(cv::Range(i,i+1),cv::Range(0,output.cols));
         mat2line(mats[i],lineROI, channels);
@@ -226,7 +226,7 @@ void label2target(const std::vector<std::vector<bool>> &labels, cv::Mat &target)
     
     int labelLength = labels[0].size();
     target.create(cv::Size(labelLength,labels.size()),CV_32F);
-    for(int i=0;i<labels.size();i++)
+    for(size_t i=0;i<labels.size();i++)
     {
         for(int j=0;j<labelLength;j++)
             target.at<float>(i,j) = float(labels[i][j]);

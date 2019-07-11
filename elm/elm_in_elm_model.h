@@ -25,7 +25,7 @@ public:
     void fitSubModels(int batchSize = -1, bool validating = true, bool verbose = true);
     void fitSubModels_faceFeat(int batchSize = -1, bool validating = true, bool verbose = true);
     void fitMainModel(int batchSize = -1, bool validating = true, bool verbose = true);
-    void fitMainModel_faceFeat(int batchSize = -1, bool validating = true, bool verbose = true);
+    void fitMainModel_faceFeat(int batchSize = -1, bool validating = false, bool verbose = true);
     
     void trainNewImg(const cv::Mat &img, const std::string label);
     void trainNewFace(const cv::Mat &img, const std::string label);

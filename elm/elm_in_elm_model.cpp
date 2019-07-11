@@ -60,9 +60,9 @@ void ELM_IN_ELM_Model::loadStandardDataset(const std::string path, const float t
 void labelBin2Names(std::vector<std::vector<bool>> labelBins, std::vector<std::string> labelStrings, 
                     std::vector<std::string> &names)
 {
-    for(int i=0;i<labelBins.size();i++)
+    for(size_t i=0;i<labelBins.size();i++)
     {
-        for(int j=0;j<labelBins[i].size();j++)
+        for(size_t j=0;j<labelBins[i].size();j++)
         {
             if(labelBins[i][j])
             {
@@ -92,11 +92,11 @@ void ELM_IN_ELM_Model::loadStandardFaceDataset(const std::string path, const flo
     faceImgPreprocessing(m_testImgs,m_faceFeats_test,names_test);
     
     //test
-    for(int i=0;i<m_faceFeats.rows;i++)
-    {
-        std::cout<<"name:"<<names_train[i]<<std::endl;
-        std::cout<<"resnet feat:\n"<<m_faceFeats.rowRange(i,i+1)<<std::endl;
-    }
+    //for(int i=0;i<m_faceFeats.rows;i++)
+    //{
+    //    std::cout<<"name:"<<names_train[i]<<std::endl;
+    //    std::cout<<"resnet feat:\n"<<m_faceFeats.rowRange(i,i+1)<<std::endl;
+    //}
     
     m_C = m_label_string.size();
     m_Q = m_trainImgs.size();
@@ -350,11 +350,9 @@ void ELM_IN_ELM_Model::fitMainModel_faceFeat(int batchSize, bool validating, boo
                 float score = calcScore(output,batchTarget);
                 std::cout<<"Score on batch training data:"<<score<<std::endl;
                 
-                /*
                 //计算在测试数据上的准确率
                 if(validating && m_testImgs.size()>0)
                     validate();
-                */
             }
         }
     }
@@ -508,7 +506,7 @@ void ELM_IN_ELM_Model::query(const cv::Mat &mat, int n, std::vector<std::string>
     std::vector<int> maxIds;
     getMaxNId(output,n,maxIds);
     
-    for(size_t i=0;i<n;i++)
+    for(int i=0;i<n;i++)
         names.push_back(m_label_string[maxIds[i]]);
 }
 
@@ -541,7 +539,7 @@ void ELM_IN_ELM_Model::queryFace(const cv::Mat &feat, int n, std::vector<std::st
     std::vector<int> maxIds;
     getMaxNId(output,n,maxIds);
     
-    for(size_t i=0;i<n;i++)
+    for(int i=0;i<n;i++)
         names.push_back(m_label_string[maxIds[i]]);
 }
 
@@ -567,7 +565,7 @@ void ELM_IN_ELM_Model::queryFace(const cv::Mat &feat, int n, std::vector<std::st
     std::vector<int> maxIds;
     getMaxNId(output,n,maxIds);
     
-    for(size_t i=0;i<n;i++)
+    for(int i=0;i<n;i++)
     {
         names.push_back(m_label_string[maxIds[i]]);
         sims.push_back(output.at<float>(0,maxIds[i]));
@@ -580,7 +578,7 @@ void ELM_IN_ELM_Model::clearTrainData()
         return;
     
     m_subModelToTrain.clearTrainData();
-    for(int i=0;i<m_subModels.size();i++)
+    for(size_t i=0;i<m_subModels.size();i++)
         m_subModels[i].clearTrainData();
     
     if(!m_trainImgs.empty())
@@ -599,7 +597,7 @@ void ELM_IN_ELM_Model::clearTrainData_feat()
         return;
     
     m_subModelToTrain.clearTrainData();
-    for(int i=0;i<m_subModels.size();i++)
+    for(size_t i=0;i<m_subModels.size();i++)
         m_subModels[i].clearTrainData();
     
     if(!m_faceFeats.empty())
@@ -617,7 +615,7 @@ void ELM_IN_ELM_Model::trainNewImg(const cv::Mat &img, const std::string label)
     clearTrainData();
     m_trainImgs.push_back(img);
     std::vector<bool> labelBin(m_C,0);
-    for(int i=0;i<m_label_string.size();i++)
+    for(size_t i=0;i<m_label_string.size();i++)
         if(label == m_label_string[i])
         {
             labelBin[i] = 1;
@@ -653,7 +651,7 @@ void ELM_IN_ELM_Model::trainNewFace(const cv::Mat &img, const std::string label)
     //std::cout<<"feat:\n"<<feat<<std::endl;
     
     std::vector<bool> labelBin(m_C,0);
-    for(int i=0;i<m_label_string.size();i++)
+    for(size_t i=0;i<m_label_string.size();i++)
         if(label == m_label_string[i])
         {
             labelBin[i] = 1;

@@ -41,7 +41,7 @@ void ELM_Model::inputData_2d(std::vector<cv::Mat> &mats, const std::vector<std::
     //转化label为target
     label2target(labels,m_Target);
     //m_inputLayerData.create(cv::Size(m_I,m_Q),CV_32F);
-    for(int i=0;i<mats.size();i++)
+    for(size_t i=0;i<mats.size();i++)
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
     mats2lines(mats,m_inputLayerData,m_channels);
     
@@ -82,7 +82,7 @@ void ELM_Model::inputData_2d_test(std::vector<cv::Mat> &mats, const std::vector<
     label2target(labels,m_Target_test);
     
     //m_inputLayerData_test.create(cv::Size(m_I,m_Q_test),CV_32F);
-    for(int i=0;i<mats.size();i++)
+    for(size_t i=0;i<mats.size();i++)
         cv::resize(mats[i],mats[i],cv::Size(m_width,m_height));
     mats2lines(mats,m_inputLayerData_test,m_channels);
     
@@ -309,7 +309,7 @@ void ELM_Model::query(const cv::Mat &mat, cv::Mat &output)
 
 void ELM_Model::batchQuery(std::vector<cv::Mat> &inputMats, cv::Mat &outputMat)
 {
-    for(int i=0;i<inputMats.size();i++)
+    for(size_t i=0;i<inputMats.size();i++)
         cv::resize(inputMats[i],inputMats[i],cv::Size(m_width,m_height));
     
     cv::Mat inputLayerData(cv::Size(m_width*m_height*m_channels,inputMats.size()),CV_32F);
@@ -437,7 +437,7 @@ void ELM_Model::trainNewImg(const cv::Mat &img, const std::string label)
     clearTrainData();
     
     std::vector<bool> labelBin(m_O,0);
-    for(int i=0;i<m_label_string.size();i++)
+    for(size_t i=0;i<m_label_string.size();i++)
         if(label == m_label_string[i])
         {
             labelBin[i] = 1;
