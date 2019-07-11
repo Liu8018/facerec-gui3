@@ -41,6 +41,7 @@ public:
     
     void saveFeat_add(std::string name, const cv::Mat &feat);
     void saveFeats_overwrite(std::vector<std::string> names, const cv::Mat &feats);
+    void loadFeats(cv::Mat &feats, std::vector<std::string> &names);
     void loadFeats(const std::vector<std::string> &candidates, cv::Mat &feats, std::vector<std::string> &names);
     void saveFeats_resnet(std::vector<std::string> names, const cv::Mat &feats);
     void loadFeats_resnet(std::vector<std::string> &names, cv::Mat &feats);

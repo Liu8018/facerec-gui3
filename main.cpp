@@ -7,6 +7,20 @@
 int main(int argc, char *argv[])
 {
     std::string strArgv(argv[1]);
+    
+    if(strArgv == "clean")
+    {
+        
+    }
+    if(strArgv == "clean-elm")
+    {
+        
+    }
+    if(strArgv == "clean-resnet")
+    {
+        
+    }
+    
     if(strArgv.find("updatedb") == std::string::npos)
     {
         if(argc < 3)

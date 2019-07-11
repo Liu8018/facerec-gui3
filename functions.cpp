@@ -8,6 +8,8 @@
 #include <opencv2/highgui.hpp>
 #include "elm/ELM_functions.h"
 
+const std::string HASH_FILE_PATH = "";
+
 const cv::Size FACE_IMGSIZE = cv::Size(50,50);
 const int ELM_MODELS_COUNT = 12;
 const int ELM_NHIDDENNODES = 32;
@@ -27,6 +29,35 @@ void refitEIEModel()
     eieModel.fitMainModel_faceFeat();
     
     eieModel.save();
+}
+
+void updateFeatDb()
+{
+    std::map<std::string,bool> dbFiles;
+    if(access(HASH_FILE_PATH.data(),F_OK) != -1)
+        dlib::deserialize(HASH_FILE_PATH) >> dbFiles;
+    
+    std::map<std::string,std::string> files;
+    getFiles(FACEDB_PATH,files);
+    
+    for(std::map<std::string, std::string>::iterator it = files.begin();it != files.end();it++)
+    {
+        //文件不在库中，则提取特征
+        if(dbFiles.find(it->first) == dbFiles.end())
+        {
+            cv::Mat src = cv::imread(it->first);
+            if(src.empty())
+                continue;
+            
+            cv::Mat feat;
+            faceImgPreprocessing(src,feat);
+            
+            g_featEX.saveFeat_add(it->second,feat);
+            dbFiles.insert(std::pair<std::string,bool>(it->first,true));
+        }
+    }
+    
+    dlib::serialize(HASH_FILE_PATH) << dbFiles;
 }
 
 void updateResnetDb()
@@ -118,6 +149,9 @@ void handleFaceDb(int method)
     
     if(method == 1)
     {
+        //更新特征库
+        updateFeatDb();
+        
         //重新训练elm-in-elm模型
         refitEIEModel();
     }
@@ -185,6 +219,49 @@ bool isEmptyFaceDb()
         return false;
 }
 
+void getFiles(std::string path, std::vector<std::string> &files)
+{
+	DIR *dir;
+	struct dirent *ptr;
+
+	if(path[path.length()-1] != '/')
+		path = path + "/";
+
+	if((dir = opendir(path.c_str())) == nullptr)
+	{
+		std::cout<<"open the dir: "<< path <<" error!" <<std::endl;
+		return;
+	}
+	
+	while((ptr=readdir(dir)) !=nullptr )
+	{
+		///current dir OR parrent dir 
+		if(strcmp(ptr->d_name,".")==0 || strcmp(ptr->d_name,"..")==0) 
+            continue; 
+		else if(ptr->d_type == 8) //file
+		{
+			std::string fn(ptr->d_name);
+            
+            std::string tail = fn.substr(fn.length()-3,fn.length()-1);
+            if(tail == "dat" || tail == "xml")
+                continue;
+            
+			std::string p = path + fn;
+			files.push_back(p);
+		}
+		else if(ptr->d_type == 10)    ///link file
+		{}
+		else if(ptr->d_type == 4)    ///dir
+		{
+            std::string p = path + std::string(ptr->d_name);
+            getFiles(p,files);
+        }
+	}
+	
+	closedir(dir);
+	return ;
+}
+
 void getFiles(std::string path, std::map<std::string, std::string> &files)
 {
 	DIR *dir;
@@ -216,7 +293,6 @@ void getFiles(std::string path, std::map<std::string, std::string> &files)
             className.pop_back();
             className = className.substr(className.find_last_of("/")+1,className.length()-1);
             
-            //只有文件名中带有人名(上级文件夹名)的图片，才会被加入
             //if(fn.find(className) == std::string::npos)
             //    continue;
             

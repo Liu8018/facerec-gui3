@@ -270,6 +270,14 @@ void FeatExtraction::saveFeats_overwrite(std::vector<std::string> names, const c
     fswrite.release();
 }
 
+void FeatExtraction::loadFeats(cv::Mat &feats, std::vector<std::string> &names)
+{
+    cv::FileStorage fsread(FEATS_PATH,cv::FileStorage::READ);
+    fsread["names"]>>names;
+    fsread["feats"]>>feats;
+    fsread.release();
+}
+
 void FeatExtraction::loadFeats(const std::vector<std::string> &candidates, 
                                cv::Mat &feats, std::vector<std::string> &names)
 {

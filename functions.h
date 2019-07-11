@@ -23,6 +23,7 @@ void markImg(cv::Mat &img);
 bool isMarkedImg(const cv::Mat &img);
 
 //获取标准文件夹格式下的文件
+void getFiles(std::string path, std::vector<std::string> &files);
 void getFiles(std::string path, std::map<std::string, std::string> &files);
 void getFiles_less(std::string path, std::map<std::string, std::string> &files);
 void getFileByName(std::string path, std::vector<cv::Mat> &imgs);
