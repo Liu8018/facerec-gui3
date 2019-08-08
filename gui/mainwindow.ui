@@ -40,7 +40,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>登记</string>
+     <string>Register</string>
     </property>
    </widget>
    <widget class="QLabel" name="icon_label0">

@@ -115,23 +115,6 @@ void MainWindow::showNames(std::vector<std::string> &candidates, std::vector<flo
         qstr.append("\n");
     }
     ui->label_names->setText(qstr);
-    
-    /*
-    std::map<float,std::string> score_names;
-    for(int i=0;i<candidates.size();i++)
-        score_names.insert(std::pair<float,std::string>(sims[i],candidates[i]));
-    
-    QString qstr;
-    //反向遍历并输出
-    for(std::map<float,std::string>::reverse_iterator it = score_names.rbegin();it!=score_names.rend();it++)
-    {
-        qstr.append(it->second.data());
-        qstr.append(":");
-        qstr.append(std::to_string(it->first).substr(0,6).data());
-        qstr.append("\n");
-    }
-    ui->label_names->setText(qstr);
-    */
 }
 
 void MainWindow::updateFrame()

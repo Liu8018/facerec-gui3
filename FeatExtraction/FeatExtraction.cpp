@@ -218,6 +218,14 @@ void FeatExtraction::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::
     std::vector<cv::Point> landmarks;
     dlibPoint2cvPoint(shape,landmarks);
     
+    /*
+    //test
+    cv::Mat testShapeImg = inputImg.clone();
+    drawShape(testShapeImg,shape);
+    cv::namedWindow("testShapeImg",0);
+    cv::imshow("testShapeImg",testShapeImg);
+    */
+    
     //以两眼连线偏角绕矩形框中心旋转整幅图像
     cv::Point leye = landmarks[36];
     cv::Point reye = landmarks[45];
