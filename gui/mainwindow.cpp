@@ -155,23 +155,26 @@ void MainWindow::updateFrame()
                 std::vector<std::string> candidates;
                 cv::Mat feat;
                 faceImgPreprocessing(m_faceROI,feat);
-                g_faceRC.getCandidatesByELM(feat,n,candidates,sims);
-                
-                //name = g_faceRC.recognize_byFeat(feat,candidates,sims);
-                
-                orderNamesBySims(candidates,sims);
-                
-                // /*
-                if(sims[0] >= ELMREC_THRESHOLD)
-                    name = candidates[0];
-                else
-                    name = "others";
-                // */
-                
-                showNames(candidates,sims);
-                
-                //for(int i=0;i<n;i++)
-                //    std::cout<<"name:"<<candidates[i]<<" sim:"<<sims[i]<<std::endl;
+                if(!feat.empty())
+                {
+                    g_faceRC.getCandidatesByELM(feat,n,candidates,sims);
+                    
+                    //name = g_faceRC.recognize_byFeat(feat,candidates,sims);
+                    
+                    orderNamesBySims(candidates,sims);
+                    
+                    // /*
+                    if(sims[0] >= ELMREC_THRESHOLD)
+                        name = candidates[0];
+                    else
+                        name = "others";
+                    // */
+                    
+                    showNames(candidates,sims);
+                    
+                    //for(int i=0;i<n;i++)
+                    //    std::cout<<"name:"<<candidates[i]<<" sim:"<<sims[i]<<std::endl;
+                }
             }
             
             //绘制识别结果

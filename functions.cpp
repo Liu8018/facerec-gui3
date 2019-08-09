@@ -431,7 +431,7 @@ void faceImgPreprocessing(const cv::Mat &img, cv::Mat &feat)
     cv::resize(img2,img2,FACE_IMGSIZE);
     
     //均衡化
-    //equalizeIntensity(img2);
+    equalizeIntensity(img2);
     
     //特征提取
     g_featEX.extract(img2,feat);

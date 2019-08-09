@@ -3,7 +3,11 @@
 #include <dlib/opencv/cv_image.h>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/xfeatures2d.hpp>
 #include <iostream>
+
+const std::string FEATEX_METHOD = "resnet";
 
 FeatExtraction g_featEX;
 
@@ -25,9 +29,15 @@ void FeatExtraction::extract(const cv::Mat &img, cv::Mat &feat)
         return;
     }
     
-    if(m_method == "lbp")
+    if(m_method == "highDimLbp")
     {
-        lbpEx(img,feat);
+        highDimLbpEx(img,feat);
+        return;
+    }
+    
+    if(m_method == "multi")
+    {
+        multiFeatEx(img,feat);
         return;
     }
 }
@@ -92,7 +102,7 @@ void FeatExtraction::resnetEx(const cv::Mat &faceMat, cv::Mat &feat)
     }
 }
 
-void FeatExtraction::lbpEx(const cv::Mat &faceMat, cv::Mat &feat)
+void FeatExtraction::highDimLbpEx(const cv::Mat &faceMat, cv::Mat &feat)
 {
     //转换图像格式
     cv::Mat faceMat2;
@@ -114,29 +124,265 @@ void FeatExtraction::lbpEx(const cv::Mat &faceMat, cv::Mat &feat)
     
     //转换为Mat
     feat.create(1,tmpFeat.size(),CV_32F);
-    for(int i=0;i<tmpFeat.size();i++)
+    for(size_t i=0;i<tmpFeat.size();i++)
         feat.at<float>(0,i) = tmpFeat[i];
 }
 
-void dlibPoint2cvPoint(const dlib::full_object_detection &S, std::vector<cv::Point> &L)
+void FeatExtraction::multiFeatEx(const cv::Mat &faceMat, cv::Mat &feat)
+{
+    //得到68个landmarks
+    cv::Rect rect(0,0,faceMat.cols-1,faceMat.rows-1);
+    dlib::full_object_detection shape;
+    getShape(faceMat,rect,shape);
+    std::vector<cv::Point2f> landmarks;
+    dlibPoint2cvPoint2f(shape,landmarks);
+    
+    //填充周围
+    float paddingRatio = 0.2;
+    cv::Mat faceMat_pad = padImg(faceMat,paddingRatio);
+    int ew = faceMat.cols*paddingRatio;
+    int eh = faceMat.rows*paddingRatio;
+    for(size_t i=0;i<landmarks.size();i++)
+    {
+        landmarks[i].x += ew;
+        landmarks[i].y += eh;
+    }
+    
+    //point2f转keypoint
+    std::vector<cv::KeyPoint> kp;
+    cv::KeyPoint::convert(landmarks,kp);
+    
+    /*
+    //test
+    cv::Mat testImg = faceMat_pad.clone();
+    for(size_t i=0;i<landmarks.size();i++)
+        cv::circle(testImg,cv::Point(landmarks[i].x,landmarks[i].y),2,cv::Scalar(0,0,255));
+    cv::imshow("faceMat_pad",testImg);
+    cv::waitKey();
+    */
+    
+    //计算特征描述子
+    std::vector<cv::Mat> descs;
+    
+    //double st = cv::getTickCount();
+    
+    cv::Mat tmpDesc;
+    cv::Ptr<cv::DescriptorExtractor> orbEx = cv::ORB::create();
+    orbEx->compute(faceMat_pad, kp, tmpDesc);
+    descs.push_back(tmpDesc);
+    
+    //double rt = (cv::getTickCount()-st)/cv::getTickFrequency();
+    //std::cout<<"0:"<<rt<<std::endl;
+    //st = cv::getTickCount();
+    
+    tmpDesc = cv::Mat();
+    cv::Ptr<cv::DescriptorExtractor> freakEx = cv::xfeatures2d::FREAK::create();
+    freakEx->compute(faceMat_pad, kp, tmpDesc);
+    descs.push_back(tmpDesc);
+    
+    //rt = (cv::getTickCount()-st)/cv::getTickFrequency();
+    //std::cout<<"2:"<<rt<<std::endl;
+    //st = cv::getTickCount();
+    
+    tmpDesc = cv::Mat();
+    cv::Ptr<cv::DescriptorExtractor> siftEx = cv::xfeatures2d::SIFT::create();
+    siftEx->compute(faceMat_pad, kp, tmpDesc);
+    descs.push_back(tmpDesc);
+    
+    //rt = (cv::getTickCount()-st)/cv::getTickFrequency();
+    //std::cout<<"3:"<<rt<<std::endl;
+    //st = cv::getTickCount();
+    
+    tmpDesc = cv::Mat();
+    cv::Ptr<cv::DescriptorExtractor> surfEx = cv::xfeatures2d::SURF::create();
+    surfEx->compute(faceMat_pad, kp, tmpDesc);
+    descs.push_back(tmpDesc);
+    
+    //rt = (cv::getTickCount()-st)/cv::getTickFrequency();
+    //std::cout<<"4:"<<rt<<std::endl;
+    //st = cv::getTickCount();
+    
+    tmpDesc = cv::Mat();
+    cv::Ptr<cv::DescriptorExtractor> latchEx = cv::xfeatures2d::LATCH::create();
+    latchEx->compute(faceMat_pad, kp, tmpDesc);
+    descs.push_back(tmpDesc);
+    
+    //rt = (cv::getTickCount()-st)/cv::getTickFrequency();
+    //std::cout<<"6:"<<rt<<std::endl;
+    //st = cv::getTickCount();
+    
+    tmpDesc = cv::Mat();
+    cv::Ptr<cv::DescriptorExtractor> vggEx = cv::xfeatures2d::VGG::create();
+    vggEx->compute(faceMat_pad, kp, tmpDesc);
+    descs.push_back(tmpDesc);
+    
+    //rt = (cv::getTickCount()-st)/cv::getTickFrequency();
+    //std::cout<<"7:"<<rt<<std::endl;
+    //st = cv::getTickCount();
+    
+    tmpDesc = cv::Mat();
+    cv::Ptr<cv::DescriptorExtractor> lucidEx = cv::xfeatures2d::LUCID::create();
+    lucidEx->compute(faceMat_pad, kp, tmpDesc);
+    descs.push_back(tmpDesc);
+    
+    //rt = (cv::getTickCount()-st)/cv::getTickFrequency();
+    //std::cout<<"8:"<<rt<<std::endl;
+    //st = cv::getTickCount();
+    
+    tmpDesc = cv::Mat();
+    cv::Ptr<cv::DescriptorExtractor> boostEx = cv::xfeatures2d::BoostDesc::create();
+    boostEx->compute(faceMat_pad, kp, tmpDesc);
+    descs.push_back(tmpDesc);
+    
+    //rt = (cv::getTickCount()-st)/cv::getTickFrequency();
+    //std::cout<<"9:"<<rt<<std::endl;
+    
+    //descs转为feat
+    int featLength = 0;
+    for(size_t i=0;i<descs.size();i++)
+    {
+        //std::cout<<"id:"<<i<<std::endl;
+        //std::cout<<descs[i].size<<std::endl;
+        //std::cout<<descs[i]<<std::endl;
+        
+        if(descs[i].rows < 68)
+            return;
+        
+        featLength += descs[i].cols;
+        
+        descs[i].convertTo(descs[i],CV_32F);
+        cv::normalize(descs[i],descs[i],1,0,cv::NORM_INF);
+        
+        //std::cout<<descs[i]<<std::endl;
+    }
+    featLength *= 68;
+    
+    //std::cout<<"featLength:"<<featLength<<std::endl;
+    
+    feat.create(1,featLength,CV_32F);
+    int idx = 0;
+    for(size_t i=0;i<descs.size();i++)
+    {
+        for(int x=0;x<descs[i].cols;x++)
+            for(int y=0;y<descs[i].rows;y++)
+            {
+                feat.at<float>(0,idx) = descs[i].at<float>(y,x);
+                idx++;
+            }
+    }
+    
+    /*
+    //int blockSize = 9;
+    for(int i=0;i<landmarks.size();i++)
+    {
+        //得到landmarks[i]的邻域
+        cv::Mat nbBlock;
+        getNbBlock(faceMat,landmarks[i],blockSize,nbBlock);
+        
+        //提取特征描述子
+    }
+    */
+}
+
+cv::Mat FeatExtraction::padImg(const cv::Mat &img, float paddingRatio)
+{
+    int w = img.cols;
+    int h = img.rows;
+    
+    int ew = w*paddingRatio;
+    int eh = h*paddingRatio;
+    
+    w += 2*ew;
+    h += 2*eh;
+    
+    cv::Mat img2(h,w,img.type());
+    if(img2.channels()==3)
+        img2 = cv::Scalar(0,0,0);
+    else
+        img2 = cv::Scalar(0);
+    
+    cv::Mat ROI = img2(cv::Range(eh,eh+img.rows),cv::Range(ew,ew+img.cols));
+    img.copyTo(ROI);
+    
+    return img2;
+}
+
+/*
+void FeatExtraction::getNbBlock(const cv::Mat &img, cv::Point center, int blockSize, cv::Mat &block)
+{
+    int halfLen = blockSize/2;
+    
+    bool left = false;
+    bool right = false;
+    bool top = false;
+    bool bottom = false;
+    
+    int x1 = center.x - halfLen;
+    if(x1 < 0) {x1 = 0; left = true;}
+
+    int y1 = center.y - halfLen;
+    if(y1 < 0) {y1 = 0; top = true;}
+    
+    int x2 = center.x + halfLen;
+    if(x2 > img.cols-1) {x2 = img.cols-1; right = true;}
+    
+    int y2 = center.y + halfLen;
+    if(y2 > img.rows-1) {y2 = img.rows-1; bottom = true;}
+    
+    cv::Mat tmpBlock = img(cv::Rect(x1,y1,x2-x1,y2-y1));
+    
+    block.create(blockSize,blockSize,img.type());
+    if(block.channels()==3)
+        block = cv::Scalar(0,0,0);
+    else
+        block = cv::Scalar(0);
+    
+    if(left && top)
+    {
+        cv::Mat ROI = block(cv::Range(0,tmpBlock.rows),cv::Range(0,tmpBlock.cols));
+        tmpBlock.copyTo(ROI);
+    }
+    else if(left && bottom)
+    {
+        cv::Mat ROI = block(cv::Range(0,tmpBlock.rows),cv::Range(0,tmpBlock.cols));
+        tmpBlock.copyTo(ROI);
+    }
+    else if(right && top)
+    {
+        
+    }
+    else if(right && bottom)
+    {
+        
+    }
+}
+*/
+
+void FeatExtraction::dlibPoint2cvPoint(const dlib::full_object_detection &S, std::vector<cv::Point> &L)
 {
     for(unsigned int i = 0; i<S.num_parts();++i)
         L.push_back(cv::Point(S.part(i).x(),S.part(i).y()));
 }
 
-void cvRect2dlibRect(const cv::Rect &cvRec, dlib::rectangle &dlibRec)
+void FeatExtraction::dlibPoint2cvPoint2f(const dlib::full_object_detection &S, std::vector<cv::Point2f> &L)
+{
+    for(unsigned int i = 0; i<S.num_parts();++i)
+        L.push_back(cv::Point2f(S.part(i).x(),S.part(i).y()));
+}
+
+void FeatExtraction::cvRect2dlibRect(const cv::Rect &cvRec, dlib::rectangle &dlibRec)
 {
     dlibRec = dlib::rectangle((long)cvRec.tl().x, (long)cvRec.tl().y, (long)cvRec.br().x - 1, (long)cvRec.br().y - 1);
 }
 
-void drawShape(cv::Mat &img, dlib::full_object_detection shape)
+void FeatExtraction::drawShape(cv::Mat &img, dlib::full_object_detection shape)
 {
     //shape转化为landmarks
     std::vector<cv::Point> landmarks;
     dlibPoint2cvPoint(shape,landmarks);
     
     //test:在两眼之间画线
-    for(int i=0;i<landmarks.size();i++)
+    for(size_t i=0;i<landmarks.size();i++)
     {
         cv::circle(img,landmarks[i],3,cv::Scalar(0,255,0),-1);
         cv::putText(img,std::to_string(i),landmarks[i],1,0.8,cv::Scalar(255,0,0));
@@ -184,6 +430,39 @@ void modifyRectByFacePt(const dlib::full_object_detection &shape, cv::Rect &rect
     for(unsigned int i = 0; i<shape.num_parts();++i)
         landmarks.push_back(cv::Point(shape.part(i).x(),shape.part(i).y()));
     
+    int l = landmarks[0].x;
+    int r = landmarks[0].x;
+    int t = landmarks[0].y;
+    int b = landmarks[0].y;
+    
+    for(size_t i=0;i<landmarks.size();i++)
+    {
+        if(landmarks[i].x < l)
+            l = landmarks[i].x;
+        
+        if(landmarks[i].x > r)
+            r = landmarks[i].x;
+        
+        if(landmarks[i].y < t)
+            t = landmarks[i].y;
+        
+        if(landmarks[i].y > b)
+            b = landmarks[i].y;
+    }
+    
+    float expandRatio = 0.05;
+    
+    int ew = (r-l)*expandRatio;
+    int eh = (b-t)*expandRatio;
+    
+    l -= ew;
+    r += ew;
+    t -= eh;
+    b += eh;
+    
+    rect = cv::Rect(l,t,r-l,b-t);
+    
+    /*
     int b = landmarks[8].y;
     
     int l1 = landmarks[0].x;
@@ -206,6 +485,7 @@ void modifyRectByFacePt(const dlib::full_object_detection &shape, cv::Rect &rect
     rect.y = t-2*refLen;
     rect.width = r-rect.x+refLen;
     rect.height = b-rect.y;
+    */
 }
 
 void FeatExtraction::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::Mat &resultImg)
@@ -222,8 +502,9 @@ void FeatExtraction::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::
     //test
     cv::Mat testShapeImg = inputImg.clone();
     drawShape(testShapeImg,shape);
-    cv::namedWindow("testShapeImg",0);
-    cv::imshow("testShapeImg",testShapeImg);
+    cv::rectangle(testShapeImg,faceRect,cv::Scalar(255,0,0),2);
+    cv::namedWindow("testShapeImg0",0);
+    cv::imshow("testShapeImg0",testShapeImg);
     */
     
     //以两眼连线偏角绕矩形框中心旋转整幅图像
@@ -242,6 +523,15 @@ void FeatExtraction::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::
     getShape(rotatedImg,faceRect,shape2);
     modifyRectByFacePt(shape2,faceRect);
     modifyROI(rotatedImg.size(),faceRect);
+    
+    /*
+    //test
+    cv::Mat testShapeImg2 = rotatedImg.clone();
+    drawShape(testShapeImg2,shape2);
+    cv::rectangle(testShapeImg2,faceRect,cv::Scalar(255,0,0),2);
+    cv::namedWindow("testShapeImg",0);
+    cv::imshow("testShapeImg",testShapeImg2);
+    */
     
     resultImg = rotatedImg(faceRect).clone();
 }
@@ -298,11 +588,11 @@ void FeatExtraction::loadFeats(const std::vector<std::string> &candidates,
     fsread.release();
     
     std::vector<cv::Mat> featList;
-    for(int i=0;i<tmpNames.size();i++)
+    for(size_t i=0;i<tmpNames.size();i++)
     {
         std::string name = tmpNames[i];
         
-        for(int j=0;j<candidates.size();j++)
+        for(size_t j=0;j<candidates.size();j++)
         {
             if(name == candidates[j])
             {
@@ -319,7 +609,7 @@ void FeatExtraction::loadFeats(const std::vector<std::string> &candidates,
         return;
     
     feats.create(featList.size(),featList[0].cols,CV_32F);
-    for(int i=0;i<featList.size();i++)
+    for(size_t i=0;i<featList.size();i++)
     {
         cv::Mat ROI = feats.rowRange(i,i+1);
         featList[i].copyTo(ROI);

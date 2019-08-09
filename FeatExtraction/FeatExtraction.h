@@ -51,7 +51,10 @@ public:
     void resnetEx(const cv::Mat &faceMat, cv::Mat &feat);
     
     //高维lbp方法
-    void lbpEx(const cv::Mat &faceMat, cv::Mat &feat);
+    void highDimLbpEx(const cv::Mat &faceMat, cv::Mat &feat);
+    
+    //提取多种特征
+    void multiFeatEx(const cv::Mat &faceMat, cv::Mat &feat);
     
 private:
     std::string m_method;
@@ -59,6 +62,14 @@ private:
     
     anet_type m_resnet;
     
+    void dlibPoint2cvPoint(const dlib::full_object_detection &S, std::vector<cv::Point> &L);
+    void dlibPoint2cvPoint2f(const dlib::full_object_detection &S, std::vector<cv::Point2f> &L);
+    void cvRect2dlibRect(const cv::Rect &cvRec, dlib::rectangle &dlibRec);
+    void drawShape(cv::Mat &img, dlib::full_object_detection shape);
+    
+    cv::Mat padImg(const cv::Mat &img, float paddingRatio);
+    
+    void getNbBlock(const cv::Mat &img, cv::Point center, int blockSize, cv::Mat &block);
 };
 
 extern FeatExtraction g_featEX;
