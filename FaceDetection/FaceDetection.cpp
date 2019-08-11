@@ -1,13 +1,15 @@
 #include "FaceDetection.h"
+#include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include "params.h"
 #include <iostream>
 
+FaceDetection g_faceDT;
+
+/*
 #define DETECT_BUFFER_SIZE 0x20000
 
 const float FACEDT_CONF_THRESHOLD = 90;
-
-FaceDetection g_faceDT;
 
 FaceDetection::FaceDetection()
 {
@@ -68,9 +70,23 @@ void FaceDetection::detect(const cv::Mat &img, std::vector<cv::Rect> &boxes)
             boxes.push_back(faceRect);
         }
     }
-    /*
+}
+*/
+
+const std::string FACEDT_MODEL_PATH = "./data/models/opencv_face_detector_uint8.pb";
+const std::string FACEDT_MODELCONF_PATH = "./data/models/opencv_face_detector.pbtxt";
+
+const float FACEDT_CONF_THRESHOLD = 0.7;
+
+FaceDetection::FaceDetection()
+{
+    
+}
+
+void FaceDetection::detect(const cv::Mat &img, std::vector<cv::Rect> &boxes)
+{
     if(m_net.empty())
-        m_net = cv::dnn::readNetFromTensorflow(FACEDT_MODEL_PATH,FACEDT_MODELCONF_PATH);
+        m_net = cv::dnn::readNet(FACEDT_MODEL_PATH,FACEDT_MODELCONF_PATH);
     
     boxes.clear();
     
@@ -98,5 +114,4 @@ void FaceDetection::detect(const cv::Mat &img, std::vector<cv::Rect> &boxes)
             boxes.push_back(rect);
         }
     }
-    */
 }

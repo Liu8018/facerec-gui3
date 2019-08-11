@@ -63,6 +63,7 @@ LIBS += -L$$PWD/../libs/ \
         -ldlib \
         -lpthread \
         -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgproc -lopencv_imgcodecs \
+        -lopencv_dnn \
          #-lopencv_features2d -lopencv_xfeatures2d -lopencv_flann\
         -lfacedetection
 

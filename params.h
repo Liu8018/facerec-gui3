@@ -12,10 +12,6 @@ extern std::string REC_METHOD;
 //人脸数据库路径
 const std::string FACEDB_PATH = "./data/face_database";
 
-//人脸检测
-const std::string FACEDT_MODEL_PATH = "./data/models/opencv_face_detector_uint8.pb";
-const std::string FACEDT_MODELCONF_PATH = "./data/models/opencv_face_detector.pbtxt";
-
 //特征提取
 const std::string SHAPE_PREDICTOR_PATH = "./data/models/shape_predictor_68_face_landmarks.dat";
 const std::string RESNET_MODEL_PATH = "./data/models/dlib_face_recognition_resnet_model_v1.dat";
