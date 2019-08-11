@@ -3,8 +3,8 @@
 #include <dlib/opencv/cv_image.h>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/features2d.hpp>
-#include <opencv2/xfeatures2d.hpp>
+//#include <opencv2/features2d.hpp>
+//#include <opencv2/xfeatures2d.hpp>
 #include <iostream>
 
 const std::string FEATEX_METHOD = "resnet";
@@ -130,6 +130,7 @@ void FeatExtraction::highDimLbpEx(const cv::Mat &faceMat, cv::Mat &feat)
 
 void FeatExtraction::multiFeatEx(const cv::Mat &faceMat, cv::Mat &feat)
 {
+    /*
     //得到68个landmarks
     cv::Rect rect(0,0,faceMat.cols-1,faceMat.rows-1);
     dlib::full_object_detection shape;
@@ -152,14 +153,14 @@ void FeatExtraction::multiFeatEx(const cv::Mat &faceMat, cv::Mat &feat)
     std::vector<cv::KeyPoint> kp;
     cv::KeyPoint::convert(landmarks,kp);
     
-    /*
+    
     //test
     cv::Mat testImg = faceMat_pad.clone();
     for(size_t i=0;i<landmarks.size();i++)
         cv::circle(testImg,cv::Point(landmarks[i].x,landmarks[i].y),2,cv::Scalar(0,0,255));
     cv::imshow("faceMat_pad",testImg);
     cv::waitKey();
-    */
+    
     
     //计算特征描述子
     std::vector<cv::Mat> descs;
@@ -270,6 +271,7 @@ void FeatExtraction::multiFeatEx(const cv::Mat &faceMat, cv::Mat &feat)
                 idx++;
             }
     }
+    */
     
     /*
     //int blockSize = 9;
