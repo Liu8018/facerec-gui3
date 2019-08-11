@@ -1,7 +1,8 @@
 #ifndef FACEDETECTOR_H
 #define FACEDETECTOR_H
 
-/*
+//用yushiqi的人脸检测库
+
 #include "facedetectcnn.h"
 #include <opencv2/core.hpp>
 
@@ -19,8 +20,9 @@ private:
     int resizeWidth;
     float resizeRatio;
 };
-*/
 
+//用opencv的dnn模块
+/*
 #include <opencv2/dnn.hpp>
 
 class FaceDetection
@@ -33,6 +35,7 @@ public:
 private:
     cv::dnn::Net m_net;
 };
+*/
 
 extern FaceDetection g_faceDT;
 

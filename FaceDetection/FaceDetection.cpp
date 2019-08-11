@@ -6,7 +6,8 @@
 
 FaceDetection g_faceDT;
 
-/*
+//用yushiqi的人脸检测库------------------------------------------------------------------------------
+
 #define DETECT_BUFFER_SIZE 0x20000
 
 const float FACEDT_CONF_THRESHOLD = 90;
@@ -71,8 +72,10 @@ void FaceDetection::detect(const cv::Mat &img, std::vector<cv::Rect> &boxes)
         }
     }
 }
-*/
 
+
+//用opencv的dnn模块--------------------------------------------------------------------------------
+/*
 const std::string FACEDT_MODEL_PATH = "./data/models/opencv_face_detector_uint8.pb";
 const std::string FACEDT_MODELCONF_PATH = "./data/models/opencv_face_detector.pbtxt";
 
@@ -115,3 +118,4 @@ void FaceDetection::detect(const cv::Mat &img, std::vector<cv::Rect> &boxes)
         }
     }
 }
+*/
