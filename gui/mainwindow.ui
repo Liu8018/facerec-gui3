@@ -54,7 +54,7 @@
     </property>
     <property name="styleSheet">
      <string notr="true">background-color: rgb(171, 171, 171);
-background-image: url(:/icons/icons/icon0.jpg);</string>
+background-image: url(:/rcs/icons/icon0.jpg);</string>
     </property>
     <property name="text">
      <string/>
@@ -71,7 +71,7 @@ background-image: url(:/icons/icons/icon0.jpg);</string>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color: rgb(171, 171, 171);
-background-image: url(:/icons/icons/BIT.jpg);</string>
+background-image: url(:/rcs/icons/BIT.jpg);</string>
     </property>
     <property name="text">
      <string/>
@@ -87,7 +87,7 @@ background-image: url(:/icons/icons/BIT.jpg);</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(238, 238, 236);</string>
+     <string notr="true">background-color: rgba(121, 174, 198, 211);</string>
     </property>
     <property name="text">
      <string/>
