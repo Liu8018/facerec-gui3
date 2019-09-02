@@ -655,3 +655,29 @@ void FeatExtraction::addResnetFeat(const cv::Mat &faceImg, const std::string &na
     fswrite<<"feats"<<feats;
     fswrite.release();
 }
+
+float FeatExtraction::getMaxSim(const cv::Mat &feat, std::string name)
+{
+    std::vector<std::string> candidates;
+    candidates.push_back(name);
+    
+    cv::Mat feats;
+    std::vector<std::string> names;
+    loadFeats(feats,names);
+    
+    float maxSim = 0;
+    for(int i=0;i<feats.rows;i++)
+    {
+        cv::Mat featInDB = feats.rowRange(i,i+1);
+        float a = cv::norm(feat);
+        float b = cv::norm(featInDB);
+        float c = cv::norm(feat-featInDB);
+        
+        float sim = (a*a + b*b - c*c)/(2*a*b);
+        
+        if(sim > maxSim)
+            maxSim = sim;
+    }
+    
+    return maxSim;
+}

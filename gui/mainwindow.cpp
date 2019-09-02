@@ -161,16 +161,20 @@ void MainWindow::updateFrame()
                     
                     //name = g_faceRC.recognize_byFeat(feat,candidates,sims);
                     
-                    orderNamesBySims(candidates,sims);
+                    //orderNamesBySims(candidates,sims);
                     
                     // /*
                     if(sims[0] >= ELMREC_THRESHOLD)
+                    {
                         name = candidates[0];
+                        sims[0] = g_featEX.getMaxSim(feat,name);
+                        cv::putText(m_frame,std::to_string(sims[0]),cv::Point(objects[0].x+objects[0].width/2,objects[0].y),1,2,cv::Scalar(255,100,0),2);
+                    }
                     else
                         name = "others";
                     // */
                     
-                    showNames(candidates,sims);
+                    //showNames(candidates,sims);
                     
                     //for(int i=0;i<n;i++)
                     //    std::cout<<"name:"<<candidates[i]<<" sim:"<<sims[i]<<std::endl;

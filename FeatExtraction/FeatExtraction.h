@@ -56,6 +56,9 @@ public:
     //提取多种特征
     void multiFeatEx(const cv::Mat &faceMat, cv::Mat &feat);
     
+    //计算最高相似度
+    float getMaxSim(const cv::Mat &feat, std::string name);
+    
 private:
     std::string m_method;
     dlib::shape_predictor m_shapePredictor;
