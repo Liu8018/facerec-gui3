@@ -198,10 +198,10 @@ void FeatExtraction::calcPCA()
     
     cv::Mat data = asRowMatrix(faces,CV_32F);
     
-    cv::Mat averageFace = cv::imread("./data/models/averageFace.png");
-    std::vector<cv::Mat> tmpFaces;
-    tmpFaces.push_back(averageFace);
-    cv::Mat averageData = asRowMatrix(tmpFaces,CV_32F);
+    //cv::Mat averageFace = cv::imread("./data/models/averageFace.png");
+    //std::vector<cv::Mat> tmpFaces;
+    //tmpFaces.push_back(averageFace);
+    //cv::Mat averageData = asRowMatrix(tmpFaces,CV_32F);
     
     //m_pca = cv::PCA(data, averageData, cv::PCA::DATA_AS_ROW, 0.99);
     m_pca = cv::PCA(data, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);

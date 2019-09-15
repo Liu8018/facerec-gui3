@@ -9,7 +9,7 @@
 #include "elm/ELM_functions.h"
 
 const cv::Size FACE_IMGSIZE = cv::Size(50,50);
-const int ELM_MODELS_COUNT = 16;
+const int ELM_MODELS_COUNT = 8;
 const int ELM_NHIDDENNODES = 32;
 
 void refitEIEModel()
