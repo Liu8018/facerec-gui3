@@ -56,6 +56,13 @@ public:
     //提取多种特征
     void multiFeatEx(const cv::Mat &faceMat, cv::Mat &feat);
     
+    //pca
+    void pcaEx(const cv::Mat &faceMat, cv::Mat &feat);
+    void calcPCA();
+    void updatePCA(const cv::Mat &newFace);
+    void loadPCA();
+    void savePCA();
+    
     //计算最高相似度
     float getMaxSim(const cv::Mat &feat, std::string name);
     
@@ -64,6 +71,11 @@ private:
     dlib::shape_predictor m_shapePredictor;
     
     anet_type m_resnet;
+    
+    cv::Mat m_PCA_mean;
+    cv::Mat m_PCA_eigenVecs;
+    cv::Mat m_PCA_DTD;
+    cv::PCA m_pca;
     
     void dlibPoint2cvPoint(const dlib::full_object_detection &S, std::vector<cv::Point> &L);
     void dlibPoint2cvPoint2f(const dlib::full_object_detection &S, std::vector<cv::Point2f> &L);

@@ -13,6 +13,8 @@ void updateResnetDb();
 //重新训练elm-in-elm模型
 void refitEIEModel();
 
+void updateFeatDb();
+
 //升级数据库
 void handleFaceDb(int method);
 
@@ -27,6 +29,8 @@ void getFiles(std::string path, std::map<std::string, std::string> &files);
 void getFiles_less(std::string path, std::map<std::string, std::string> &files);
 void getFileByName(std::string path, std::vector<cv::Mat> &imgs);
 void getSubDirs(std::string path, std::vector<std::string> &subDirs);
+
+void getAllFace(std::vector<cv::Mat> &faces);
 
 //均衡化
 void equalizeIntensity(cv::Mat &img);

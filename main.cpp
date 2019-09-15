@@ -34,6 +34,10 @@ int main(int argc, char *argv[])
         std::cout<<cmd_rm_featsFiles<<std::endl;
         system(cmd_rm_featsFiles.data());
         
+        std::string cmd_rm_pcaFile = "rm ./data/face_database/pca.xml";
+        std::cout<<cmd_rm_pcaFile<<std::endl;
+        system(cmd_rm_pcaFile.data());
+        
         return 0;
     }
     if(strArgv == "clean-resnet")

@@ -8,8 +8,8 @@
 #include "functions.h"
 #include <opencv2/highgui.hpp>
 
-const int NCANDIDATES = 5;
-const float ELMREC_THRESHOLD = 0.7;
+const int NCANDIDATES = 1;
+const float ELMREC_THRESHOLD = 0.0;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -226,6 +226,12 @@ void MainWindow::addFace(std::string name)
     }
     if(REC_METHOD == "elm")
     {
+        g_featEX.calcPCA();
+        updateFeatDb();
+        refitEIEModel();
+        g_faceRC.reloadEIE();
+        
+        /*
         if(isNewClass)//需改进
         {
             refitEIEModel();
@@ -236,5 +242,6 @@ void MainWindow::addFace(std::string name)
             g_faceRC.EIEtrainNewFace(m_faceROI,name);
             g_faceRC.reloadEIE();
         }
+        */
     }
 }

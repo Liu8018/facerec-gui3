@@ -154,6 +154,8 @@ void handleFaceDb(int method)
     
     if(method == 1)
     {
+        g_featEX.calcPCA();
+        
         //更新特征库
         updateFeatDb();
         
@@ -382,6 +384,25 @@ void getFileByName(std::string path, std::vector<cv::Mat> &imgs)
     closedir(dir);
 }
 
+void getAllFace(std::vector<cv::Mat> &faces)
+{
+    std::map<std::string, std::string> files;
+    getFiles("./data/face_database",files);
+    
+    faces.resize(files.size());
+    
+    int traverseId=0;
+    for(std::map<std::string, std::string>::iterator it = files.begin(); it != files.end(); it++)
+    {
+        cv::Mat image = cv::imread(it->first);
+        
+        cv::resize(image,image,cv::Size(50,50));
+        
+        faces[traverseId] = image.clone();
+        traverseId++;
+    }
+}
+
 void equalizeIntensity(cv::Mat &img)
 {
     if(img.channels() == 3)
@@ -437,7 +458,7 @@ void faceImgPreprocessing(const cv::Mat &img, cv::Mat &feat)
     g_featEX.extract(img2,feat);
     
     //归一化
-    //normalize(feat);
+    normalize(feat);
 }
 
 void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats)

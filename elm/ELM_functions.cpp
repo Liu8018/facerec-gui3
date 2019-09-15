@@ -34,6 +34,10 @@ void inputImgsFrom(const std::string datasetPath,
     
     int classes = files.size();
     
+    srand(time(nullptr));
+    if(shuffle)
+        std::random_shuffle(files.begin(),files.end());
+    
     for(size_t i=0;i<files.size();i++)
     {
         std::cout<<"[INFO] loading data from "<<files[i]<<std::endl;

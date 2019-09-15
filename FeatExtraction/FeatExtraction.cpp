@@ -6,8 +6,11 @@
 //#include <opencv2/features2d.hpp>
 //#include <opencv2/xfeatures2d.hpp>
 #include <iostream>
+#include "functions.h"
 
-const std::string FEATEX_METHOD = "resnet";
+const std::string FEATEX_METHOD = "pca";
+
+const std::string PCA_PATH = "./data/face_database/pca.xml";
 
 FeatExtraction g_featEX;
 
@@ -23,6 +26,12 @@ FeatExtraction::FeatExtraction()
 
 void FeatExtraction::extract(const cv::Mat &img, cv::Mat &feat)
 {
+    if(m_method == "pca")
+    {
+        pcaEx(img,feat);
+        return;
+    }
+    
     if(m_method == "resnet")
     {
         resnetEx(img,feat);
@@ -126,6 +135,129 @@ void FeatExtraction::highDimLbpEx(const cv::Mat &faceMat, cv::Mat &feat)
     feat.create(1,tmpFeat.size(),CV_32F);
     for(size_t i=0;i<tmpFeat.size();i++)
         feat.at<float>(0,i) = tmpFeat[i];
+}
+
+cv::Mat asRowMatrix(const std::vector<cv::Mat>& src, int rtype)
+{
+    //std::cout<<"asRowMatrix input 0:"<<src[0]<<std::endl;
+    
+    //样本数量
+    size_t n = src.size();
+    //如果没有样本，返回空矩阵
+    if(n == 0)
+        return cv::Mat();
+    //样本的维数
+    size_t d = src[0].total()*src[0].channels();
+    //std::cout<<"d:"<<d<<std::endl;
+
+    cv::Mat data(n, d, rtype);
+    //拷贝数据
+    for(int i = 0; i < n; i++)
+    {
+        cv::Mat xi = data.row(i);
+        //转化为1行，n列的格式
+        if(src[i].isContinuous())
+        {
+            src[i].reshape(1, 1).convertTo(xi, rtype);
+        } 
+        else{
+            src[i].clone().reshape(1, 1).convertTo(xi, rtype);
+        }
+    }
+    
+    //std::cout<<"asRowMatrix output:"<<data<<std::endl;
+    
+    return data;
+}
+
+void FeatExtraction::pcaEx(const cv::Mat &faceMat, cv::Mat &feat)
+{
+    if(m_pca.eigenvectors.empty())
+        loadPCA();
+    
+    std::vector<cv::Mat> tmpFaces;
+    tmpFaces.push_back(faceMat);
+    
+    cv::Mat data = asRowMatrix(tmpFaces,CV_32F);
+    
+    //std::cout<<"m_PCA_mean:"<<m_pca.mean<<std::endl;
+    //std::cout<<"m_PCA_eigenVecs:"<<m_pca.eigenvectors<<std::endl;
+    //std::cout<<"data:"<<data<<std::endl;
+    
+    //cv::PCAProject(data,m_PCA_mean,m_PCA_eigenVecs,feat);
+    m_pca.project(data,feat);
+    
+    //std::cout<<"feat:"<<feat<<std::endl;
+}
+
+void FeatExtraction::calcPCA()
+{
+    //载入数据
+    std::vector<cv::Mat> faces;
+    getAllFace(faces);
+    
+    cv::Mat data = asRowMatrix(faces,CV_32F);
+    
+    cv::Mat averageFace = cv::imread("./data/models/averageFace.png");
+    std::vector<cv::Mat> tmpFaces;
+    tmpFaces.push_back(averageFace);
+    cv::Mat averageData = asRowMatrix(tmpFaces,CV_32F);
+    
+    //m_pca = cv::PCA(data, averageData, cv::PCA::DATA_AS_ROW, 0.99);
+    m_pca = cv::PCA(data, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);
+    
+    //m_PCA_mean = averageData;
+    //m_PCA_eigenVecs = pca.eigenvectors;
+    
+    //计算DTD
+    //cv::Mat D = data.clone();
+    //for(int i=0;i<data.rows;i++)
+    //    data.row(i) -= averageData;
+    
+    //m_PCA_DTD = D.t() * D;
+    
+    //std::cout<<"m_PCA_mean:"<<m_pca.mean<<std::endl;
+    //std::cout<<"m_PCA_eigenVecs:"<<m_pca.eigenvectors<<std::endl;
+    //std::cout<<"data:"<<data<<std::endl;
+    
+    //保存
+    savePCA();
+}
+
+void FeatExtraction::updatePCA(const cv::Mat &newFace)
+{
+    if(m_PCA_DTD.empty())
+        loadPCA();
+    
+    
+}
+
+void FeatExtraction::loadPCA()
+{
+    /*
+    cv::FileStorage fsread(PCA_PATH,cv::FileStorage::READ);
+    fsread["mean"]>>m_PCA_mean;
+    fsread["eigenVecs"]>>m_PCA_eigenVecs;
+    fsread["DTD"]>>m_PCA_DTD;
+    fsread.release();
+    */
+    
+    cv::FileStorage fsread(PCA_PATH,cv::FileStorage::READ);
+    m_pca.read(fsread.root());
+}
+
+void FeatExtraction::savePCA()
+{
+    /*
+    cv::FileStorage fswrite(PCA_PATH,cv::FileStorage::WRITE);
+    fswrite<<"mean"<<m_PCA_mean;
+    fswrite<<"eigenVecs"<<m_PCA_eigenVecs;
+    fswrite<<"DTD"<<m_PCA_DTD;
+    fswrite.release();
+    */
+    
+    cv::FileStorage fswrite(PCA_PATH,cv::FileStorage::WRITE);
+    m_pca.write(fswrite);
 }
 
 void FeatExtraction::multiFeatEx(const cv::Mat &faceMat, cv::Mat &feat)
