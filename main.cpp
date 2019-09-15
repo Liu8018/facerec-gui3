@@ -30,9 +30,9 @@ int main(int argc, char *argv[])
         std::cout<<cmd_rm_elmModels<<std::endl;
         system(cmd_rm_elmModels.data());
         
-        std::string cmd_rm_featsFiles = "rm " + FEATS_PATH + " " + HASH_FILE_PATH;
-        std::cout<<cmd_rm_featsFiles<<std::endl;
-        system(cmd_rm_featsFiles.data());
+        std::string cmd_rm_featsFile = "rm " + FEATS_PATH;
+        std::cout<<cmd_rm_featsFile<<std::endl;
+        system(cmd_rm_featsFile.data());
         
         std::string cmd_rm_pcaFile = "rm ./data/face_database/pca.xml";
         std::cout<<cmd_rm_pcaFile<<std::endl;

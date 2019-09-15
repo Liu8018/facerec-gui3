@@ -9,7 +9,7 @@
 #include "elm/ELM_functions.h"
 
 const cv::Size FACE_IMGSIZE = cv::Size(50,50);
-const int ELM_MODELS_COUNT = 8;
+const int ELM_MODELS_COUNT = 4;
 const int ELM_NHIDDENNODES = 32;
 
 void refitEIEModel()
@@ -38,18 +38,25 @@ void refitEIEModel()
 
 void updateFeatDb()
 {
-    std::map<std::string,bool> dbFiles;
-    if(access(HASH_FILE_PATH.data(),F_OK) != -1)
-        dlib::deserialize(HASH_FILE_PATH) >> dbFiles;
+    std::string cmd_rm_featsFile = "rm " + FEATS_PATH;
+    if(access(cmd_rm_featsFile.data(),F_OK) != -1)
+        system(cmd_rm_featsFile.data());
+    
+    //std::map<std::string,bool> dbFiles;
+    //if(access(HASH_FILE_PATH.data(),F_OK) != -1)
+    //    dlib::deserialize(HASH_FILE_PATH) >> dbFiles;
     
     std::map<std::string,std::string> files;
     getFiles(FACEDB_PATH,files);
     
+    std::vector<std::string> names;
+    cv::Mat feats;
+    
     for(std::map<std::string, std::string>::iterator it = files.begin();it != files.end();it++)
     {
         //文件不在库中，则提取特征
-        if(dbFiles.find(it->first) == dbFiles.end())
-        {
+        //if(dbFiles.find(it->first) == dbFiles.end())
+        //{
             cv::Mat src = cv::imread(it->first);
             if(src.empty())
                 continue;
@@ -57,12 +64,17 @@ void updateFeatDb()
             cv::Mat feat;
             faceImgPreprocessing(src,feat);
             
-            g_featEX.saveFeat_add(it->second,feat);
-            dbFiles.insert(std::pair<std::string,bool>(it->first,true));
-        }
+            //g_featEX.saveFeat_add(it->second,feat);
+            //dbFiles.insert(std::pair<std::string,bool>(it->first,true));
+            
+            names.push_back(it->second);
+            feats.push_back(feat);
+        //}
     }
     
-    dlib::serialize(HASH_FILE_PATH) << dbFiles;
+    //dlib::serialize(HASH_FILE_PATH) << dbFiles;
+    
+    g_featEX.saveFeats_overwrite(names,feats);
 }
 
 void updateResnetDb()
