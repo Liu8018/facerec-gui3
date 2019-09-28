@@ -548,14 +548,21 @@ void FeatExtraction::getShape(const cv::Mat &inputImg, const cv::Rect &faceRect,
 
 void modifyROI(const cv::Size imgSize, cv::Rect &rect)
 {
-    if(rect.x < 0)
-        rect.x = 0;
-    if(rect.y < 0)
-        rect.y = 0;
-    if(rect.br().x > imgSize.width-1)
-        rect.width = imgSize.width-1-rect.x;
-    if(rect.br().y > imgSize.height-1)
-        rect.height = imgSize.height-1-rect.y;
+    int x1 = rect.x;
+    int y1 = rect.y;
+    int x2 = rect.br().x;
+    int y2 = rect.br().y;
+    
+    if(x1 < 0)
+        x1 = 0;
+    if(y1 < 0)
+        y1 = 0;
+    if(x2 > imgSize.width-1)
+        x2 = imgSize.width-1;
+    if(y2 > imgSize.height-1)
+        y2 = imgSize.height-1;
+    
+    rect = cv::Rect(cv::Point(x1,y1),cv::Point(x2,y2));
 }
 
 void modifyRectByFacePt(const dlib::full_object_detection &shape, cv::Rect &rect)

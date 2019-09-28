@@ -26,6 +26,9 @@ CONFIG += c++11
 
 SOURCES += \
         FaceDetection/FaceDetection.cpp \
+    FaceDetection/facedetectcnn-int8data.cpp \
+    FaceDetection/facedetectcnn-model.cpp \
+    FaceDetection/facedetectcnn.cpp \
         FaceRecognition/FaceRecognition.cpp \
         FeatExtraction/FeatExtraction.cpp \
         elm/ELM_functions.cpp \
@@ -39,6 +42,7 @@ SOURCES += \
 
 HEADERS += \
         FaceDetection/FaceDetection.h \
+    FaceDetection/facedetectcnn.h \
         FaceRecognition/FaceRecognition.h \
         FeatExtraction/FeatExtraction.h \
         elm/ELM_functions.h \
@@ -62,10 +66,7 @@ INCLUDEPATH += $$PWD/../include
 LIBS += -L$$PWD/../libs/ \
         -ldlib \
         -lpthread \
-        -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgproc -lopencv_imgcodecs \
-        -lopencv_dnn \
-         #-lopencv_features2d -lopencv_xfeatures2d -lopencv_flann\
-        -lfacedetection
+        -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgproc -lopencv_imgcodecs
 
 RESOURCES += \
     gui/resources.qrc
