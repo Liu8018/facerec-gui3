@@ -10,7 +10,7 @@
 #include "debug.h"
 
 const int NCANDIDATES = 1;
-const float ELMREC_THRESHOLD = 0.92;
+const float ELMREC_THRESHOLD = 0.90;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),

@@ -57,7 +57,7 @@ void updateFeatDb()
         //文件不在库中，则提取特征
         //if(dbFiles.find(it->first) == dbFiles.end())
         //{
-            cv::Mat src = cv::imread(it->first);
+            cv::Mat src = cv::imread(it->first,0);
             if(src.empty())
                 continue;
             
@@ -406,7 +406,7 @@ void getAllFace(std::vector<cv::Mat> &faces)
     int traverseId=0;
     for(std::map<std::string, std::string>::iterator it = files.begin(); it != files.end(); it++)
     {
-        cv::Mat image = cv::imread(it->first);
+        cv::Mat image = cv::imread(it->first,0);
         
         cv::resize(image,image,cv::Size(50,50));
         
@@ -459,6 +459,8 @@ void loadXmlAsMat(std::string path, cv::Mat &mat)
 void faceImgPreprocessing(const cv::Mat &img, cv::Mat &feat)
 {
     cv::Mat img2 = img.clone();
+    if(img2.channels() == 3)
+        cv::cvtColor(img2,img2,cv::COLOR_BGR2GRAY);
     
     //缩放为标准尺寸
     cv::resize(img2,img2,FACE_IMGSIZE);
