@@ -7,9 +7,10 @@
 #include "FaceRecognition/FaceRecognition.h"
 #include "functions.h"
 #include <opencv2/highgui.hpp>
+#include "debug.h"
 
 const int NCANDIDATES = 1;
-const float ELMREC_THRESHOLD = 0.0;
+const float ELMREC_THRESHOLD = 0.92;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -164,11 +165,13 @@ void MainWindow::updateFrame()
                     //orderNamesBySims(candidates,sims);
                     
                     // /*
+                    sims[0] = g_featEX.getMaxSim(feat,name);
                     if(sims[0] >= ELMREC_THRESHOLD)
                     {
+                        //std::cout<<sims[0]<<std::endl;
+                        //DBG("")
                         name = candidates[0];
-                        sims[0] = g_featEX.getMaxSim(feat,name);
-                        cv::putText(m_frame,std::to_string(sims[0]),cv::Point(objects[0].x+objects[0].width/2,objects[0].y),1,2,cv::Scalar(255,100,0),2);
+                        cv::putText(m_frame,std::to_string(sims[0]).substr(0,5),cv::Point(objects[0].x+objects[0].width/2,objects[0].y),1,2,cv::Scalar(255,100,0),2);
                     }
                     else
                         name = "others";

@@ -45,6 +45,7 @@ HEADERS += \
     FaceDetection/facedetectcnn.h \
         FaceRecognition/FaceRecognition.h \
         FeatExtraction/FeatExtraction.h \
+    debug.h \
         elm/ELM_functions.h \
         elm/elm_in_elm_model.h \
         elm/elm_model.h \
