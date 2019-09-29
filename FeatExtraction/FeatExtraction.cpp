@@ -197,6 +197,14 @@ void FeatExtraction::calcPCA()
     std::vector<cv::Mat> faces;
     getAllFace(faces);
     
+    for(int i=0;i<faces.size();i++)
+    {
+        cv::cvtColor(faces[i],faces[i],cv::COLOR_BGR2Lab);
+        std::vector<cv::Mat> cns;
+        cv::split(faces[i],cns);
+        cns[0].copyTo(faces[i]);
+    }
+    
     cv::Mat data = asRowMatrix(faces,CV_32F);
     
     //cv::Mat averageFace = cv::imread("./data/models/averageFace.png");

@@ -459,6 +459,10 @@ void loadXmlAsMat(std::string path, cv::Mat &mat)
 void faceImgPreprocessing(const cv::Mat &img, cv::Mat &feat)
 {
     cv::Mat img2 = img.clone();
+    cv::cvtColor(img2,img2,cv::COLOR_BGR2Lab);
+    std::vector<cv::Mat> cns;
+    cv::split(img2,cns);
+    cns[0].copyTo(img2);
     
     //缩放为标准尺寸
     cv::resize(img2,img2,FACE_IMGSIZE);
