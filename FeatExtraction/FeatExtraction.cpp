@@ -7,6 +7,7 @@
 //#include <opencv2/xfeatures2d.hpp>
 #include <iostream>
 #include "functions.h"
+#include "debug.h"
 
 const std::string FEATEX_METHOD = "pca";
 
@@ -675,6 +676,89 @@ void FeatExtraction::alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::
     */
     
     resultImg = rotatedImg(faceRect).clone();
+}
+
+bool FeatExtraction::judgeFaceAndAlign(const cv::Mat &inputImg, cv::Rect &faceRect, cv::Mat &resultImg)
+{
+    //扩展一下矩形框
+    float expandRatio = 0.2;
+    int wExpand = faceRect.width*expandRatio;
+    int hExpand = faceRect.height*expandRatio;
+    faceRect.width += wExpand;
+    faceRect.height += hExpand;
+    faceRect.x -= wExpand/2;
+    faceRect.y -= hExpand/2;
+    modifyROI(inputImg.size(),faceRect);
+    
+    //获取特征点
+    dlib::full_object_detection shape;
+    getShape(inputImg,faceRect,shape);
+    
+    /*
+    //test
+    cv::Mat testImg = inputImg.clone();
+    cv::rectangle(testImg,faceRect,cv::Scalar(255,0,0));
+    drawShape(testImg,shape);
+    cv::imshow("test",testImg);
+    cv::waitKey();
+    */
+    
+    //shape转化为landmarks
+    std::vector<cv::Point> landmarks;
+    dlibPoint2cvPoint(shape,landmarks);
+    
+    cv::Point leye = landmarks[36];
+    cv::Point reye = landmarks[45];
+    double dy = reye.y - leye.y; 
+    double dx = reye.x - leye.x; 
+    double angle = atan2(dy, dx) * 180.0 / CV_PI;
+    
+    cv::Point center = cv::Point(faceRect.x+faceRect.width/2,faceRect.y+faceRect.height/2);
+    cv::Mat rotMat = cv::getRotationMatrix2D(center, angle, 1); 
+    cv::Mat rotatedImg;
+    cv::warpAffine(inputImg, rotatedImg, rotMat, inputImg.size());
+    
+    //取这时矩形框内的部分作为人脸
+    dlib::full_object_detection shape2;
+    getShape(rotatedImg,faceRect,shape2);
+    modifyRectByFacePt(shape2,faceRect);
+    modifyROI(rotatedImg.size(),faceRect);
+    
+    resultImg = rotatedImg(faceRect).clone();
+    
+    //DBG(angle)
+    
+    //-----------
+    if(std::abs(angle) > 8)
+        return false;
+    
+    //-----------
+    cv::Point nose = landmarks[30];
+    int ldiff = nose.x - leye.x;
+    int rdiff = reye.x - nose.x;
+    
+    int diffh = std::abs(ldiff-rdiff);
+    
+    //DBG(diff)
+    
+    if(diffh > 16)
+        return false;
+    
+    //-----------
+    int tdiff = ((nose.y-leye.y)+(nose.y-reye.y))/2;
+    //DBG(tdiff)
+    cv::Point blip = landmarks[57];
+    int bdiff = blip.y-nose.y-20;
+    //DBG(bdiff)
+    
+    int diffv = std::abs(tdiff-bdiff);
+    
+    //DBG(diffv)
+    
+    if(diffv > 20)
+        return false;
+    
+    return true;
 }
 
 void addLine(cv::Mat &mat, const cv::Mat &line)

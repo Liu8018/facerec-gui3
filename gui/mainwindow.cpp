@@ -35,11 +35,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_timer,SIGNAL(timeout()),this,SLOT(updateFrame()));
     m_timer->setInterval(1000/m_capture.get(cv::CAP_PROP_FPS));
     m_timer->start();
-    
-    //
-    ui->label_names->setStyleSheet("background:transparent;color:blue");
-    ui->label_names->setFont(QFont("Microsoft YaHei", 18, 75));
-    ui->label_names->setAlignment(Qt::AlignTop);
 }
 
 MainWindow::~MainWindow()
@@ -105,6 +100,7 @@ void orderNamesBySims(std::vector<std::string> &candidates, std::vector<float> &
     }
 }
 
+/*
 void MainWindow::showNames(std::vector<std::string> &candidates, std::vector<float> &sims)
 {
     QString qstr;
@@ -117,6 +113,7 @@ void MainWindow::showNames(std::vector<std::string> &candidates, std::vector<flo
     }
     ui->label_names->setText(qstr);
 }
+*/
 
 void MainWindow::updateFrame()
 {
@@ -135,12 +132,18 @@ void MainWindow::updateFrame()
     if(!objects.empty())
     {
         //人脸对齐
-        g_featEX.alignFace(m_frameSrc,objects[0],m_faceROI);
+        //g_featEX.alignFace(m_frameSrc,objects[0],m_faceROI);
+        bool sPos = g_featEX.judgeFaceAndAlign(m_frameSrc,objects[0],m_faceROI);
         
         //绘制检测结果
         cv::rectangle(m_frame,objects[0],cv::Scalar(0,255,255),2);
         
-        if(!m_isEmptyRun)
+        //若人脸未正对摄像头则不识别并给出提示
+        if(!sPos){
+            cv::putText(m_frame,"Please keep your face to the camera",cv::Point(0,m_frame.rows),1,1.2,cv::Scalar(0,0,255));
+        }
+        
+        if(!m_isEmptyRun && sPos)
         {
             std::string name;
              

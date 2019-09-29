@@ -38,6 +38,7 @@ public:
     
     void getShape(const cv::Mat &inputImg, const cv::Rect &faceRect, dlib::full_object_detection &shape);
     void alignFace(const cv::Mat &inputImg, cv::Rect &faceRect, cv::Mat &resultImg);
+    bool judgeFaceAndAlign(const cv::Mat &inputImg, cv::Rect &faceRect, cv::Mat &resultImg);
     
     void saveFeat_add(std::string name, const cv::Mat &feat);
     void saveFeats_overwrite(std::vector<std::string> names, const cv::Mat &feats);
