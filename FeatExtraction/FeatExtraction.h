@@ -60,7 +60,6 @@ public:
     //pca
     void pcaEx(const cv::Mat &faceMat, cv::Mat &feat);
     void calcPCA();
-    void updatePCA(const cv::Mat &newFace);
     void loadPCA();
     void savePCA();
     
@@ -73,19 +72,22 @@ private:
     
     anet_type m_resnet;
     
-    cv::Mat m_PCA_mean;
-    cv::Mat m_PCA_eigenVecs;
-    cv::Mat m_PCA_DTD;
-    cv::PCA m_pca;
+    cv::PCA m_pca_face;
+    cv::PCA m_pca_eyebrow;
+    cv::PCA m_pca_eye;
+    cv::PCA m_pca_nose;
+    cv::PCA m_pca_mouth;
     
     void dlibPoint2cvPoint(const dlib::full_object_detection &S, std::vector<cv::Point> &L);
     void dlibPoint2cvPoint2f(const dlib::full_object_detection &S, std::vector<cv::Point2f> &L);
     void cvRect2dlibRect(const cv::Rect &cvRec, dlib::rectangle &dlibRec);
     void drawShape(cv::Mat &img, dlib::full_object_detection shape);
     
-    cv::Mat padImg(const cv::Mat &img, float paddingRatio);
+    //cv::Mat padImg(const cv::Mat &img, float paddingRatio);
     
-    void getNbBlock(const cv::Mat &img, cv::Point center, int blockSize, cv::Mat &block);
+    //void getNbBlock(const cv::Mat &img, cv::Point center, int blockSize, cv::Mat &block);
+    
+    void getFaceRegions(const cv::Mat &face, cv::Mat &eyebrow, cv::Mat &eye, cv::Mat &nose, cv::Mat &mouth);
 };
 
 extern FeatExtraction g_featEX;

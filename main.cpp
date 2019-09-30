@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
         std::cout<<cmd_rm_featsFile<<std::endl;
         system(cmd_rm_featsFile.data());
         
-        std::string cmd_rm_pcaFile = "rm ./data/face_database/pca.xml";
+        std::string cmd_rm_pcaFile = "rm ./data/face_database/pca_face.xml ./data/face_database/pca_eyebrow.xml ./data/face_database/pca_eye.xml ./data/face_database/pca_nose.xml ./data/face_database/pca_mouth.xml";
         std::cout<<cmd_rm_pcaFile<<std::endl;
         system(cmd_rm_pcaFile.data());
         

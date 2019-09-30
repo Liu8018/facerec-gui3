@@ -11,7 +11,11 @@
 
 const std::string FEATEX_METHOD = "pca";
 
-const std::string PCA_PATH = "./data/face_database/pca.xml";
+const std::string PCA_FACE_PATH = "./data/face_database/pca_face.xml";
+const std::string PCA_EYEBROW_PATH = "./data/face_database/pca_eyebrow.xml";
+const std::string PCA_EYE_PATH = "./data/face_database/pca_eye.xml";
+const std::string PCA_NOSE_PATH = "./data/face_database/pca_nose.xml";
+const std::string PCA_MOUTH_PATH = "./data/face_database/pca_mouth.xml";
 
 FeatExtraction g_featEX;
 
@@ -173,22 +177,35 @@ cv::Mat asRowMatrix(const std::vector<cv::Mat>& src, int rtype)
 
 void FeatExtraction::pcaEx(const cv::Mat &faceMat, cv::Mat &feat)
 {
-    if(m_pca.eigenvectors.empty())
+    if(m_pca_face.eigenvectors.empty())
         loadPCA();
+    
+    std::vector<cv::Mat> eyebrows(1);
+    std::vector<cv::Mat> eyes(1);
+    std::vector<cv::Mat> noses(1);
+    std::vector<cv::Mat> mouths(1);
+    getFaceRegions(faceMat,eyebrows[0],eyes[0],noses[0],mouths[0]);
     
     std::vector<cv::Mat> tmpFaces;
     tmpFaces.push_back(faceMat);
     
-    cv::Mat data = asRowMatrix(tmpFaces,CV_32F);
+    cv::Mat data_face = asRowMatrix(tmpFaces,CV_32F);
+    cv::Mat data_eyebrow = asRowMatrix(eyebrows,CV_32F);
+    cv::Mat data_eye = asRowMatrix(eyes,CV_32F);
+    cv::Mat data_nose = asRowMatrix(noses,CV_32F);
+    cv::Mat data_mouth = asRowMatrix(mouths,CV_32F);
     
-    //std::cout<<"m_PCA_mean:"<<m_pca.mean<<std::endl;
-    //std::cout<<"m_PCA_eigenVecs:"<<m_pca.eigenvectors<<std::endl;
-    //std::cout<<"data:"<<data<<std::endl;
+    //cv::Mat feat_face,feat_eyebrow,feat_eye,feat_nose,feat_mouth;
+    std::vector<cv::Mat> feat_regions(5);
+    m_pca_face.project(data_face,feat_regions[0]);
+    m_pca_eyebrow.project(data_eyebrow,feat_regions[1]);
+    m_pca_eye.project(data_eye,feat_regions[2]);
+    m_pca_nose.project(data_nose,feat_regions[3]);
+    m_pca_mouth.project(data_mouth,feat_regions[4]);
     
-    //cv::PCAProject(data,m_PCA_mean,m_PCA_eigenVecs,feat);
-    m_pca.project(data,feat);
+    cv::hconcat(feat_regions,feat);
     
-    //std::cout<<"feat:"<<feat<<std::endl;
+    //DBG(feat.size())
 }
 
 void FeatExtraction::calcPCA()
@@ -205,68 +222,125 @@ void FeatExtraction::calcPCA()
         cns[2].copyTo(faces[i]);
     }
     
-    cv::Mat data = asRowMatrix(faces,CV_32F);
+    std::vector<cv::Mat> eyebrows(faces.size());
+    std::vector<cv::Mat> eyes(faces.size());
+    std::vector<cv::Mat> noses(faces.size());
+    std::vector<cv::Mat> mouths(faces.size());
+    for(int i=0;i<faces.size();i++)
+        getFaceRegions(faces[i],eyebrows[i],eyes[i],noses[i],mouths[i]);
     
-    //cv::Mat averageFace = cv::imread("./data/models/averageFace.png");
-    //std::vector<cv::Mat> tmpFaces;
-    //tmpFaces.push_back(averageFace);
-    //cv::Mat averageData = asRowMatrix(tmpFaces,CV_32F);
+    cv::Mat data_face = asRowMatrix(faces,CV_32F);
+    cv::Mat data_eyebrow = asRowMatrix(eyebrows,CV_32F);
+    cv::Mat data_eye = asRowMatrix(eyes,CV_32F);
+    cv::Mat data_nose = asRowMatrix(noses,CV_32F);
+    cv::Mat data_mouth = asRowMatrix(mouths,CV_32F);
     
-    //m_pca = cv::PCA(data, averageData, cv::PCA::DATA_AS_ROW, 0.99);
-    m_pca = cv::PCA(data, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);
-    
-    //m_PCA_mean = averageData;
-    //m_PCA_eigenVecs = pca.eigenvectors;
-    
-    //计算DTD
-    //cv::Mat D = data.clone();
-    //for(int i=0;i<data.rows;i++)
-    //    data.row(i) -= averageData;
-    
-    //m_PCA_DTD = D.t() * D;
-    
-    //std::cout<<"m_PCA_mean:"<<m_pca.mean<<std::endl;
-    //std::cout<<"m_PCA_eigenVecs:"<<m_pca.eigenvectors<<std::endl;
-    //std::cout<<"data:"<<data<<std::endl;
+    m_pca_face = cv::PCA(data_face, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);
+    m_pca_eyebrow = cv::PCA(data_eyebrow, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);
+    m_pca_eye = cv::PCA(data_eye, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);
+    m_pca_nose = cv::PCA(data_nose, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);
+    m_pca_mouth = cv::PCA(data_mouth, cv::Mat(), cv::PCA::DATA_AS_ROW, 0.99);
     
     //保存
     savePCA();
 }
 
-void FeatExtraction::updatePCA(const cv::Mat &newFace)
-{
-    if(m_PCA_DTD.empty())
-        loadPCA();
-    
-    
-}
-
 void FeatExtraction::loadPCA()
 {
-    /*
-    cv::FileStorage fsread(PCA_PATH,cv::FileStorage::READ);
-    fsread["mean"]>>m_PCA_mean;
-    fsread["eigenVecs"]>>m_PCA_eigenVecs;
-    fsread["DTD"]>>m_PCA_DTD;
-    fsread.release();
-    */
+    cv::FileStorage fsread1(PCA_FACE_PATH,cv::FileStorage::READ);
+    m_pca_face.read(fsread1.root());
     
-    cv::FileStorage fsread(PCA_PATH,cv::FileStorage::READ);
-    m_pca.read(fsread.root());
+    cv::FileStorage fsread2(PCA_EYEBROW_PATH,cv::FileStorage::READ);
+    m_pca_eyebrow.read(fsread2.root());
+    
+    cv::FileStorage fsread3(PCA_EYE_PATH,cv::FileStorage::READ);
+    m_pca_eye.read(fsread3.root());
+    
+    cv::FileStorage fsread4(PCA_NOSE_PATH,cv::FileStorage::READ);
+    m_pca_nose.read(fsread4.root());
+    
+    cv::FileStorage fsread5(PCA_MOUTH_PATH,cv::FileStorage::READ);
+    m_pca_mouth.read(fsread5.root());
 }
 
 void FeatExtraction::savePCA()
 {
-    /*
-    cv::FileStorage fswrite(PCA_PATH,cv::FileStorage::WRITE);
-    fswrite<<"mean"<<m_PCA_mean;
-    fswrite<<"eigenVecs"<<m_PCA_eigenVecs;
-    fswrite<<"DTD"<<m_PCA_DTD;
-    fswrite.release();
-    */
+    cv::FileStorage fswrite1(PCA_FACE_PATH,cv::FileStorage::WRITE);
+    m_pca_face.write(fswrite1);
     
-    cv::FileStorage fswrite(PCA_PATH,cv::FileStorage::WRITE);
-    m_pca.write(fswrite);
+    cv::FileStorage fswrite2(PCA_EYEBROW_PATH,cv::FileStorage::WRITE);
+    m_pca_eyebrow.write(fswrite2);
+    
+    cv::FileStorage fswrite3(PCA_EYE_PATH,cv::FileStorage::WRITE);
+    m_pca_eye.write(fswrite3);
+    
+    cv::FileStorage fswrite4(PCA_NOSE_PATH,cv::FileStorage::WRITE);
+    m_pca_nose.write(fswrite4);
+    
+    cv::FileStorage fswrite5(PCA_MOUTH_PATH,cv::FileStorage::WRITE);
+    m_pca_mouth.write(fswrite5);
+}
+
+void FeatExtraction::getFaceRegions(const cv::Mat &face, cv::Mat &eyebrow, cv::Mat &eye, cv::Mat &nose, cv::Mat &mouth)
+{
+    //获取特征点
+    dlib::full_object_detection shape;
+    getShape(face,cv::Rect(0,0,face.cols,face.rows),shape);
+    
+    //shape转化为landmarks
+    std::vector<cv::Point> landmarks;
+    dlibPoint2cvPoint(shape,landmarks);
+    
+    int top, bottom, left, right;
+    
+    //eyebrow
+    //DBG("")
+    top = std::min(std::min(landmarks[18].y,landmarks[19].y),std::min(landmarks[24].y,landmarks[25].y));
+    bottom = std::max(std::max(landmarks[40].y,landmarks[41].y),std::max(landmarks[46].y,landmarks[47].y));
+    left = landmarks[17].x;
+    right = landmarks[26].x;
+    eyebrow = face(cv::Range(top,bottom),cv::Range(left,right)).clone();
+    if(eyebrow.empty())
+        eyebrow = cv::Mat(cv::Size(40,20),face.type());
+    else
+        cv::resize(eyebrow,eyebrow,cv::Size(40,20));
+    
+    //eye
+    //DBG("")
+    top = std::min(std::min(landmarks[37].y,landmarks[38].y),std::min(landmarks[43].y,landmarks[44].y));
+    bottom = std::max(std::max(landmarks[40].y,landmarks[41].y),std::max(landmarks[46].y,landmarks[47].y));
+    left = landmarks[36].x;
+    right = landmarks[45].x;
+    eye = face(cv::Range(top,bottom),cv::Range(left,right)).clone();
+    if(eye.empty())
+        eye = cv::Mat(cv::Size(30,10),face.type());
+    else
+        cv::resize(eye,eye,cv::Size(30,10));
+    
+    //nose
+    //DBG("")
+    top = landmarks[29].y;
+    bottom = landmarks[33].y;
+    left = landmarks[31].x;
+    right = landmarks[35].x;
+    nose = face(cv::Range(top,bottom),cv::Range(left,right)).clone();
+    if(nose.empty())
+        nose = cv::Mat(cv::Size(15,15),face.type());
+    else
+        cv::resize(nose,nose,cv::Size(15,15));
+    
+    //mouth
+    //DBG("")
+    top = std::min(landmarks[50].y,landmarks[52].y);
+    bottom = landmarks[57].y;
+    left = landmarks[48].x;
+    right = landmarks[54].x;
+    mouth = face(cv::Range(top,bottom),cv::Range(left,right)).clone();
+    if(mouth.empty())
+        mouth = cv::Mat(cv::Size(20,10),face.type());
+    else
+        cv::resize(mouth,mouth,cv::Size(20,10));
+    //DBG("")
 }
 
 void FeatExtraction::multiFeatEx(const cv::Mat &faceMat, cv::Mat &feat)
@@ -427,6 +501,7 @@ void FeatExtraction::multiFeatEx(const cv::Mat &faceMat, cv::Mat &feat)
     */
 }
 
+/*
 cv::Mat FeatExtraction::padImg(const cv::Mat &img, float paddingRatio)
 {
     int w = img.cols;
@@ -450,7 +525,6 @@ cv::Mat FeatExtraction::padImg(const cv::Mat &img, float paddingRatio)
     return img2;
 }
 
-/*
 void FeatExtraction::getNbBlock(const cv::Mat &img, cv::Point center, int blockSize, cv::Mat &block)
 {
     int halfLen = blockSize/2;
