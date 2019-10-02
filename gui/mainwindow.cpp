@@ -199,7 +199,6 @@ void MainWindow::updateFrame()
     showMat();
 }
 
-
 void MainWindow::addFace(std::string name)
 {
     std::string filename = FACEDB_PATH + "/" + name;
@@ -218,10 +217,16 @@ void MainWindow::addFace(std::string name)
     time_t t = time(nullptr);
     char strTime[64];
     strftime(strTime, 64, "%Y-%m-%d-%H-%M-%S", localtime(&t));
-    filename += name+std::string(strTime) + ".png";
     
-    markImg(m_faceROI);
-    cv::imwrite(filename,m_faceROI);
+    std::vector<cv::Mat> face_augs;
+    imgAugment(m_faceROI,face_augs);
+    for(int i=0;i<face_augs.size();i++)
+    {
+        std::string fn = filename + name+std::string(strTime) + "_" + std::to_string(i) + ".png";
+        markImg(face_augs[i]);
+        cv::imwrite(fn,face_augs[i]);
+    }
+    
     if(m_isEmptyRun)
         m_isEmptyRun = false;
     

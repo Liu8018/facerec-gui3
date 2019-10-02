@@ -35,6 +35,9 @@ void getAllFace(std::vector<cv::Mat> &faces);
 //均衡化
 void equalizeIntensity(cv::Mat &img);
 
+//
+void imgAugment(const cv::Mat &img, std::vector<cv::Mat> &imgs);
+
 //存储/读取xml文件
 void saveMatAsXml(const cv::Mat &mat, std::string path);
 void loadXmlAsMat(std::string path, cv::Mat &mat);

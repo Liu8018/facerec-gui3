@@ -438,6 +438,33 @@ void equalizeIntensity(cv::Mat &img)
     }
 }
 
+void imgAugment(const cv::Mat &img, std::vector<cv::Mat> &imgs)
+{
+    imgs.resize(10);
+    imgs[0] = img.clone();
+    
+    cv::Mat img_flip;
+    cv::flip(img,img_flip,1);
+    imgs[5] = img_flip.clone();
+    
+    int len=max(img.cols,img.rows);
+    cv::Mat rot_mat = getRotationMatrix2D(cv::Point(len/2,len/2),3,1.0);
+    warpAffine(img,imgs[1],rot_mat,cv::Size(len,len));
+    warpAffine(img_flip,imgs[6],rot_mat,cv::Size(len,len));
+    
+    rot_mat = getRotationMatrix2D(cv::Point(len/2,len/2),6,1.0);
+    warpAffine(img,imgs[2],rot_mat,cv::Size(len,len));
+    warpAffine(img_flip,imgs[7],rot_mat,cv::Size(len,len));
+    
+    rot_mat = getRotationMatrix2D(cv::Point(len/2,len/2),-3,1.0);
+    warpAffine(img,imgs[3],rot_mat,cv::Size(len,len));
+    warpAffine(img_flip,imgs[8],rot_mat,cv::Size(len,len));
+    
+    rot_mat = getRotationMatrix2D(cv::Point(len/2,len/2),-6,1.0);
+    warpAffine(img,imgs[4],rot_mat,cv::Size(len,len));
+    warpAffine(img_flip,imgs[9],rot_mat,cv::Size(len,len));
+}
+
 void saveMatAsXml(const cv::Mat &mat, std::string path)
 {
     cv::FileStorage fswrite(path,cv::FileStorage::WRITE);
