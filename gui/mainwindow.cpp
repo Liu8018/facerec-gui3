@@ -136,6 +136,7 @@ void MainWindow::updateFrame()
         bool sPos = g_featEX.judgeFaceAndAlign(m_frameSrc,objects[0],m_faceROI);
         
         //绘制检测结果
+        DBG("")
         cv::rectangle(m_frame,objects[0],cv::Scalar(0,255,255),2);
         
         //若人脸未正对摄像头则不识别并给出提示
@@ -143,8 +144,10 @@ void MainWindow::updateFrame()
             cv::putText(m_frame,"Please keep your face to the camera",cv::Point(0,m_frame.rows),1,1.2,cv::Scalar(0,0,255));
         }
         
+        DBG("")
         if(!m_isEmptyRun && sPos)
         {
+            DBG("")
             std::string name;
              
             if(REC_METHOD == "resnet")
@@ -154,13 +157,16 @@ void MainWindow::updateFrame()
             
             if(REC_METHOD == "elm")
             {
+                DBG("")
                 int n = NCANDIDATES;
                 std::vector<float> sims;
                 std::vector<std::string> candidates;
                 cv::Mat feat;
                 faceImgPreprocessing(m_faceROI,feat);
+                DBG("")
                 if(!feat.empty())
                 {
+                    DBG("")
                     g_faceRC.getCandidatesByELM(feat,n,candidates,sims);
                     
                     //name = g_faceRC.recognize_byFeat(feat,candidates,sims);
@@ -185,10 +191,12 @@ void MainWindow::updateFrame()
                     //for(int i=0;i<n;i++)
                     //    std::cout<<"name:"<<candidates[i]<<" sim:"<<sims[i]<<std::endl;
                 }
+                DBG("")
             }
             
             //绘制识别结果
             cv::putText(m_frame,name,objects[0].tl(),1,2,cv::Scalar(255,100,0),2);
+            DBG("")
         }
     }
     else
@@ -196,7 +204,9 @@ void MainWindow::updateFrame()
         //ui->label_names->clear();
     }
     
+    DBG("")
     showMat();
+    DBG("")
 }
 
 void MainWindow::addFace(std::string name)

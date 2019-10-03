@@ -180,22 +180,25 @@ void FeatExtraction::pcaEx(const cv::Mat &faceMat, cv::Mat &feat)
     if(m_pca_face.eigenvectors.empty())
         loadPCA();
     
+    DBG("")
     std::vector<cv::Mat> eyebrows(1);
     std::vector<cv::Mat> eyes(1);
     std::vector<cv::Mat> noses(1);
     std::vector<cv::Mat> mouths(1);
     getFaceRegions(faceMat,eyebrows[0],eyes[0],noses[0],mouths[0]);
     
+    DBG("")
     std::vector<cv::Mat> tmpFaces;
     tmpFaces.push_back(faceMat);
     
+    DBG("")
     cv::Mat data_face = asRowMatrix(tmpFaces,CV_32F);
     cv::Mat data_eyebrow = asRowMatrix(eyebrows,CV_32F);
     cv::Mat data_eye = asRowMatrix(eyes,CV_32F);
     cv::Mat data_nose = asRowMatrix(noses,CV_32F);
     cv::Mat data_mouth = asRowMatrix(mouths,CV_32F);
     
-    //cv::Mat feat_face,feat_eyebrow,feat_eye,feat_nose,feat_mouth;
+    DBG("")
     std::vector<cv::Mat> feat_regions(5);
     m_pca_face.project(data_face,feat_regions[0]);
     m_pca_eyebrow.project(data_eyebrow,feat_regions[1]);
@@ -203,9 +206,11 @@ void FeatExtraction::pcaEx(const cv::Mat &faceMat, cv::Mat &feat)
     m_pca_nose.project(data_nose,feat_regions[3]);
     m_pca_mouth.project(data_mouth,feat_regions[4]);
     
+    DBG("")
     cv::hconcat(feat_regions,feat);
     
     //DBG(feat.size())
+    DBG("")
 }
 
 void FeatExtraction::calcPCA()
@@ -299,6 +304,12 @@ void FeatExtraction::getFaceRegions(const cv::Mat &face, cv::Mat &eyebrow, cv::M
     bottom = std::max(std::max(landmarks[40].y,landmarks[41].y),std::max(landmarks[46].y,landmarks[47].y));
     left = landmarks[17].x;
     right = landmarks[26].x;
+    
+    top = std::max(0,top);
+    bottom = std::min(face.rows,bottom);
+    left = std::max(0,left);
+    right = std::min(face.cols,right);
+    
     eyebrow = face(cv::Range(top,bottom),cv::Range(left,right)).clone();
     if(eyebrow.empty())
         eyebrow = cv::Mat(cv::Size(40,20),face.type());
@@ -311,6 +322,12 @@ void FeatExtraction::getFaceRegions(const cv::Mat &face, cv::Mat &eyebrow, cv::M
     bottom = std::max(std::max(landmarks[40].y,landmarks[41].y),std::max(landmarks[46].y,landmarks[47].y));
     left = landmarks[36].x;
     right = landmarks[45].x;
+    
+    top = std::max(0,top);
+    bottom = std::min(face.rows,bottom);
+    left = std::max(0,left);
+    right = std::min(face.cols,right);
+    
     eye = face(cv::Range(top,bottom),cv::Range(left,right)).clone();
     if(eye.empty())
         eye = cv::Mat(cv::Size(30,10),face.type());
@@ -323,6 +340,12 @@ void FeatExtraction::getFaceRegions(const cv::Mat &face, cv::Mat &eyebrow, cv::M
     bottom = landmarks[33].y;
     left = landmarks[31].x;
     right = landmarks[35].x;
+    
+    top = std::max(0,top);
+    bottom = std::min(face.rows,bottom);
+    left = std::max(0,left);
+    right = std::min(face.cols,right);
+    
     nose = face(cv::Range(top,bottom),cv::Range(left,right)).clone();
     if(nose.empty())
         nose = cv::Mat(cv::Size(15,15),face.type());
@@ -335,6 +358,12 @@ void FeatExtraction::getFaceRegions(const cv::Mat &face, cv::Mat &eyebrow, cv::M
     bottom = landmarks[57].y;
     left = landmarks[48].x;
     right = landmarks[54].x;
+    
+    top = std::max(0,top);
+    bottom = std::min(face.rows,bottom);
+    left = std::max(0,left);
+    right = std::min(face.cols,right);
+    
     mouth = face(cv::Range(top,bottom),cv::Range(left,right)).clone();
     if(mouth.empty())
         mouth = cv::Mat(cv::Size(20,10),face.type());
