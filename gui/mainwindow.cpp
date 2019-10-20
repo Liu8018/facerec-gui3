@@ -8,8 +8,8 @@
 #include "functions.h"
 #include <opencv2/highgui.hpp>
 
-const int NCANDIDATES = 5;
-const float ELMREC_THRESHOLD = 0.7;
+const int NCANDIDATES = 1;
+const float ELMREC_THRESHOLD = 0.6;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -164,12 +164,10 @@ void MainWindow::updateFrame()
                     //orderNamesBySims(candidates,sims);
                     
                     // /*
+                    name = candidates[0];
+                    sims[0] = g_featEX.getMaxSim(feat,name);
                     if(sims[0] >= ELMREC_THRESHOLD)
-                    {
-                        name = candidates[0];
-                        sims[0] = g_featEX.getMaxSim(feat,name);
                         cv::putText(m_frame,std::to_string(sims[0]),cv::Point(objects[0].x+objects[0].width/2,objects[0].y),1,2,cv::Scalar(255,100,0),2);
-                    }
                     else
                         name = "others";
                     // */

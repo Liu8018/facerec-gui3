@@ -8,9 +8,9 @@
 #include <opencv2/highgui.hpp>
 #include "elm/ELM_functions.h"
 
-const cv::Size FACE_IMGSIZE = cv::Size(50,50);
-const int ELM_MODELS_COUNT = 16;
-const int ELM_NHIDDENNODES = 32;
+const cv::Size FACE_IMGSIZE = cv::Size(112,112);
+const int ELM_MODELS_COUNT = 8;
+const int ELM_NHIDDENNODES = 64;
 
 void refitEIEModel()
 {
@@ -437,7 +437,7 @@ void faceImgPreprocessing(const cv::Mat &img, cv::Mat &feat)
     g_featEX.extract(img2,feat);
     
     //归一化
-    //normalize(feat);
+    normalize(feat);
 }
 
 void faceImgPreprocessing(const std::vector<cv::Mat> &imgs, cv::Mat &feats)

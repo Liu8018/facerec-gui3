@@ -56,6 +56,9 @@ public:
     //提取多种特征
     void multiFeatEx(const cv::Mat &faceMat, cv::Mat &feat);
     
+    //MobileFace提取特征
+    void mobileFaceEx(const cv::Mat &faceMat, cv::Mat &feat);
+    
     //计算最高相似度
     float getMaxSim(const cv::Mat &feat, std::string name);
     

@@ -7,7 +7,7 @@
 //#include <opencv2/xfeatures2d.hpp>
 #include <iostream>
 
-const std::string FEATEX_METHOD = "resnet";
+const std::string FEATEX_METHOD = "mf";
 
 FeatExtraction g_featEX;
 
@@ -23,6 +23,12 @@ FeatExtraction::FeatExtraction()
 
 void FeatExtraction::extract(const cv::Mat &img, cv::Mat &feat)
 {
+    if(m_method == "mf")
+    {
+        mobileFaceEx(img,feat);
+        return;
+    }
+    
     if(m_method == "resnet")
     {
         resnetEx(img,feat);
@@ -126,6 +132,27 @@ void FeatExtraction::highDimLbpEx(const cv::Mat &faceMat, cv::Mat &feat)
     feat.create(1,tmpFeat.size(),CV_32F);
     for(size_t i=0;i<tmpFeat.size();i++)
         feat.at<float>(0,i) = tmpFeat[i];
+}
+
+void FeatExtraction::mobileFaceEx(const cv::Mat &faceMat, cv::Mat &feat)
+{
+    std::string tmpFileName = "/tmp/tmp.png";
+    
+    //输出图片
+    cv::imwrite(tmpFileName,faceMat);
+    
+    //调用python处理
+    system("python3 ./data/models/MobileFace/mf_process.py");
+    
+    //读入特征
+    std::string tmpFeatFile = "/tmp/mf_feat.txt";
+    feat.create(1,256,CV_32F);
+    
+    std::ifstream ifs(tmpFeatFile);
+    for(int i=0;i<256;i++)
+        ifs >> feat.at<float>(0,i);
+    
+    //std::cout<<"feat:\n"<<feat<<std::endl;
 }
 
 void FeatExtraction::multiFeatEx(const cv::Mat &faceMat, cv::Mat &feat)
